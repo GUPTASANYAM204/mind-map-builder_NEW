@@ -25,7 +25,7 @@ function App() {
   const [topic, setTopic] = useState('');
   const [mindMap, setMindMap] = useState<NodeData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [theme, setTheme] = useState<ThemeMode>('modern');
+  const [theme, setTheme] = useState<ThemeMode>('dark');
 
   const handleGenerateMap = async () => {
     if (!topic.trim()) return;
@@ -152,45 +152,24 @@ function App() {
 
   // Apply theme to header
   const getHeaderStyle = () => {
-    if (theme === 'modern') {
-      return { 
-        background: 'var(--modern-topbar)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)'
-      };
-    } else if (theme === 'dark') {
+    if (theme === 'dark') {
       return { background: 'var(--dark-topbar)' };
-    } else if (theme === 'vibrant') {
+    } else { // vibrant
       return { background: 'var(--vibrant-topbar-gradient)' };
-    } else {
-      return { background: 'var(--pastel-topbar)' };
     }
   };
 
   // Apply theme to button
   const getButtonStyle = () => {
-    if (theme === 'modern') {
-      return { 
-        background: 'var(--modern-gradient)', 
-        minWidth: '120px',
-        boxShadow: '0 4px 12px rgba(74, 227, 181, 0.3)',
-        transition: 'all 0.2s ease-in-out',
-        border: 'none'
-      };
-    } else if (theme === 'dark') {
+    if (theme === 'dark') {
       return { 
         background: 'var(--dark-node-2)', 
         minWidth: '120px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
       };
-    } else if (theme === 'vibrant') {
+    } else { // vibrant
       return { 
         background: 'var(--vibrant-node-2)', 
-        minWidth: '120px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      };
-    } else {
-      return { 
-        background: 'var(--gradient-green)', 
         minWidth: '120px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       };
@@ -199,19 +178,10 @@ function App() {
 
   // Apply theme to export button
   const getExportButtonStyle = () => {
-    if (theme === 'modern') {
-      return { 
-        background: 'var(--modern-card-bg)',
-        border: '1px solid var(--modern-accent)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-        transition: 'all 0.2s ease-in-out'
-      };
-    } else if (theme === 'dark') {
+    if (theme === 'dark') {
       return { background: 'var(--dark-node-1)' };
-    } else if (theme === 'vibrant') {
+    } else { // vibrant
       return { background: 'var(--vibrant-node-1)' };
-    } else {
-      return { background: 'var(--dark-green)' };
     }
   };
 

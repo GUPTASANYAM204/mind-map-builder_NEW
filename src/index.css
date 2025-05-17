@@ -10,24 +10,24 @@
   --node-color-3: var(--modern-node-3);
   
   /* Modern dark theme (default) */
-  --modern-background: #0F1419;
+  /* --modern-background: #0F1419;
   --modern-text: #FFFFFF;
   --modern-topbar: #161B22;
   --modern-node-1: #4AE3B5; /* Vibrant green */
-  --modern-node-2: #2D3748; /* Dark slate */
-  --modern-node-3: #3A506B; /* Navy blue */
-  --modern-accent: #4AE3B5; /* Vibrant green accent */
-  --modern-card-bg: #1A202C; /* Slightly lighter than background */
-  --modern-hover: #2D3748; /* Hover state */
-  --modern-gradient: linear-gradient(135deg, #4AE3B5, #2C8D99);
-  
-  /* Pastel theme */
+  /* --modern-node-2: #2D3748; /* Dark slate */
+  /* --modern-node-3: #3A506B; Navy blue */
+  /* --modern-accent: #4AE3B5; Vibrant green accent */
+  /* --modern-card-bg: #1A202C; Slightly lighter than background */
+  /* --modern-hover: #2D3748; Hover state */
+  /* --modern-gradient: linear-gradient(135deg, #4AE3B5, #2C8D99); */ 
+   
+  /* Pastel theme
   --pastel-background: #F7FAFC;
   --pastel-text: #2D3748;
   --pastel-topbar: #AEC6CF;
   --pastel-node-1: #AEC6CF;
   --pastel-node-2: #B5EAD7;
-  --pastel-node-3: #E0C3FC;
+  --pastel-node-3: #E0C3FC; */
   
   /* Dark theme */
   --dark-background: #2D3748;

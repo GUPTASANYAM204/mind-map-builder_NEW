@@ -8,7 +8,7 @@ import { generateLearningPath } from '../services/aiService';
 import type { LearningPathNode } from '../services/aiService';
 
 // Theme type definition
-export type ThemeMode = 'modern' | 'pastel' | 'dark' | 'vibrant';
+export type ThemeMode = 'dark' | 'vibrant';
 
 // Define types for our mind map data
 interface NodeData {
@@ -46,7 +46,7 @@ interface ModalState {
   y: number;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', setTheme }) => {
+const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', setTheme }) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -62,8 +62,8 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
     y: 0,
   });
   const [newNodeText, setNewNodeText] = useState('');
-  const [selectedShape, setSelectedShape] = useState<NodeShape>('circle');
-  const [selectedColorScheme] = useState<NodeColorScheme>('pastel');
+  const [selectedShape, setSelectedShape] = useState<NodeShape>('rectangle');
+  const [selectedColorScheme] = useState<NodeColorScheme>('dark');
   const [showSettings, setShowSettings] = useState(false);
   const [learningPath, setLearningPath] = useState<LearningPathNode[] | null>(null);
   const [showLearningPath, setShowLearningPath] = useState(false);
@@ -428,16 +428,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
   // Apply theme to document
   useEffect(() => {
     // Update CSS variables based on theme
-    if (theme === 'modern') {
-      document.documentElement.style.setProperty('--background-color', 'var(--modern-background)');
-      document.documentElement.style.setProperty('--text-color', 'var(--modern-text)');
-      document.documentElement.style.setProperty('--topbar-background', 'var(--modern-topbar)');
-      document.documentElement.style.setProperty('--node-color-1', 'var(--modern-node-1)');
-      document.documentElement.style.setProperty('--node-color-2', 'var(--modern-node-2)');
-      document.documentElement.style.setProperty('--node-color-3', 'var(--modern-node-3)');
-      document.body.style.backgroundColor = 'var(--modern-background)';
-      document.body.style.color = 'var(--modern-text)';
-    } else if (theme === 'dark') {
+    if (theme === 'dark') {
       document.documentElement.style.setProperty('--background-color', 'var(--dark-background)');
       document.documentElement.style.setProperty('--text-color', 'var(--dark-text)');
       document.documentElement.style.setProperty('--topbar-background', 'var(--dark-topbar)');
@@ -455,15 +446,6 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
       document.documentElement.style.setProperty('--node-color-3', 'var(--vibrant-node-3)');
       document.body.style.backgroundColor = 'var(--vibrant-background)';
       document.body.style.color = 'var(--vibrant-text)';
-    } else if (theme === 'pastel') {
-      document.documentElement.style.setProperty('--background-color', 'var(--pastel-background)');
-      document.documentElement.style.setProperty('--text-color', 'var(--pastel-text)');
-      document.documentElement.style.setProperty('--topbar-background', 'var(--pastel-topbar)');
-      document.documentElement.style.setProperty('--node-color-1', 'var(--pastel-node-1)');
-      document.documentElement.style.setProperty('--node-color-2', 'var(--pastel-node-2)');
-      document.documentElement.style.setProperty('--node-color-3', 'var(--pastel-node-3)');
-      document.body.style.backgroundColor = 'var(--pastel-background)';
-      document.body.style.color = 'var(--pastel-text)';
     }
   }, [theme]);
   
@@ -495,9 +477,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
           top: '10px',
           right: '10px',
           zIndex: 100,
-          background: theme === 'dark' ? 'var(--dark-node-2)' : 
-                     theme === 'vibrant' ? 'var(--vibrant-node-3)' : 
-                     'var(--pastel-node-1)',
+          background: theme === 'dark' ? 'var(--dark-node-2)' : 'var(--vibrant-node-3)',
           color: theme === 'dark' ? 'white' : '#333',
           border: 'none',
           borderRadius: '4px',
@@ -518,9 +498,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
             top: '10px',
             right: '120px',
             zIndex: 100,
-            background: theme === 'dark' ? 'var(--dark-node-1)' : 
-                      theme === 'vibrant' ? 'var(--vibrant-node-2)' : 
-                      'var(--pastel-node-2)',
+            background: theme === 'dark' ? 'var(--dark-node-1)' : 'var(--vibrant-node-2)',
             color: theme === 'dark' ? 'white' : '#333',
             border: 'none',
             borderRadius: '4px',
@@ -556,31 +534,27 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Shape:</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button 
-                onClick={() => setSelectedShape('circle')}
+                onClick={() => setSelectedShape('square')}
                 style={{
                   padding: '8px',
-                  background: selectedShape === 'circle' ? 
-                    (theme === 'dark' ? 'var(--dark-node-3)' : 
-                     theme === 'vibrant' ? 'var(--vibrant-node-3)' : 
-                     'var(--pastel-purple)') : 
+                  background: selectedShape === 'square' ? 
+                    (theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-3)') : 
                     'var(--gray-200)',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
                   flex: 1,
-                  color: selectedShape === 'circle' && theme === 'dark' ? 'white' : 'inherit'
+                  color: selectedShape === 'square' && theme === 'dark' ? 'white' : 'inherit'
                 }}
               >
-                Circle
+                Square
               </button>
               <button 
                 onClick={() => setSelectedShape('rectangle')}
                 style={{
                   padding: '8px',
                   background: selectedShape === 'rectangle' ? 
-                    (theme === 'dark' ? 'var(--dark-node-3)' : 
-                     theme === 'vibrant' ? 'var(--vibrant-node-3)' : 
-                     'var(--pastel-purple)') : 
+                    (theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-3)') : 
                     'var(--gray-200)',
                   border: 'none',
                   borderRadius: '4px',
@@ -591,24 +565,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
               >
                 Rectangle
               </button>
-              <button 
-                onClick={() => setSelectedShape('pill')}
-                style={{
-                  padding: '8px',
-                  background: selectedShape === 'pill' ? 
-                    (theme === 'dark' ? 'var(--dark-node-3)' : 
-                     theme === 'vibrant' ? 'var(--vibrant-node-3)' : 
-                     'var(--pastel-purple)') : 
-                    'var(--gray-200)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  flex: 1,
-                  color: selectedShape === 'pill' && theme === 'dark' ? 'white' : 'inherit'
-                }}
-              >
-                Pill
-              </button>
+
             </div>
           </div>
           
@@ -618,30 +575,12 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
           <div>
             <label style={{ display: 'block', marginBottom: '12px', fontWeight: 'bold' }}>App Theme:</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button 
-                onClick={() => changeTheme('modern')}
-                style={{
-                  padding: '10px',
-                  background: theme === 'modern' ? 'var(--modern-gradient)' : 'var(--modern-card-bg)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontWeight: theme === 'modern' ? 'bold' : 'normal',
-                  boxShadow: theme === 'modern' ? '0 4px 12px rgba(74, 227, 181, 0.3)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Modern Dark</span>
-                {theme === 'modern' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
+
               <button 
                 onClick={() => changeTheme('dark')}
                 style={{
                   padding: '10px',
-                  background: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--modern-card-bg)',
+                  background: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--dark-background)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
@@ -661,7 +600,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
                   padding: '10px',
                   background: theme === 'vibrant' ? 
                     'linear-gradient(to right, var(--vibrant-node-1), var(--vibrant-node-2))' : 
-                    'var(--modern-card-bg)',
+                    'var(--dark-background)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
@@ -675,24 +614,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
                 <span>Vibrant Mode</span>
                 {theme === 'vibrant' && <span style={{ fontSize: '18px' }}>✓</span>}
               </button>
-              <button 
-                onClick={() => changeTheme('pastel')}
-                style={{
-                  padding: '10px',
-                  background: theme === 'pastel' ? 'var(--pastel-node-1)' : 'var(--modern-card-bg)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: theme === 'pastel' ? 'var(--pastel-text)' : 'white',
-                  fontWeight: theme === 'pastel' ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Pastel Mode</span>
-                {theme === 'pastel' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
+
             </div>
           </div>
         </div>
@@ -727,12 +649,8 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
                   marginBottom: '16px',
                   padding: '12px',
                   borderRadius: '8px',
-                  background: theme === 'dark' ? 'var(--dark-node-2)' : 
-                             theme === 'vibrant' ? 'var(--vibrant-background)' : 
-                             'var(--gray-50)',
-                  borderLeft: `4px solid ${theme === 'dark' ? 'var(--dark-node-3)' : 
-                                         theme === 'vibrant' ? 'var(--vibrant-node-2)' : 
-                                         'var(--pastel-blue)'}`
+                  background: theme === 'dark' ? 'var(--dark-node-2)' : 'var(--vibrant-background)',
+                  borderLeft: `4px solid ${theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-2)'}`
                 }}
               >
                 <h4 style={{ margin: '0 0 8px 0' }}>{index + 1}. {step.title}</h4>
@@ -821,7 +739,11 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
             <div className="mb-4">
               <button
                 onClick={handleGenerateAINodes}
-                className="w-full bg-pastel-purple text-white px-4 py-2 rounded-lg mb-2"
+                className="w-full px-4 py-2 rounded-lg mb-2"
+                style={{
+                  backgroundColor: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-3)',
+                  color: 'white'
+                }}
               >
                 Generate AI Nodes
               </button>
@@ -837,7 +759,10 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'modern', 
                 />
                 <button
                   onClick={handleAddManualNode}
-                  className="bg-pastel-green text-white px-4 py-2 rounded-r-lg"
+                  className="text-white px-4 py-2 rounded-r-lg"
+                  style={{
+                    backgroundColor: theme === 'dark' ? 'var(--dark-node-2)' : 'var(--vibrant-node-2)'
+                  }}
                   disabled={!newNodeText.trim()}
                 >
                   Add
