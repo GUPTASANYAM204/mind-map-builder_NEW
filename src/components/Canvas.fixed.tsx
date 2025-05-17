@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Stage, Layer, Group, Path } from 'react-konva';
+import { Stage, Layer, Group } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import Node from './Node';
 import type { NodeShape, NodeColorScheme } from './Node';
@@ -267,28 +267,11 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
           // Calculate position for the new node
           const parentNode = findNodeById([prevMap], modal.nodeId);
           const childCount = node.children.length;
+          const angle = (Math.PI / 6) * childCount;
+          const distance = 150;
           
-          // Create a B-tree structure with better spacing
-          // Use horizontal spacing for even-indexed children and vertical for odd-indexed
-          const horizontalSpacing = 450; // Further increased horizontal spacing
-          const verticalSpacing = 500;   // Further increased vertical spacing
-          
-          // Calculate position based on child index to create a balanced tree
-          let newX, newY;
-          
-          if (childCount % 2 === 0) {
-            // Even index - position horizontally
-            const direction = Math.floor(childCount / 2) % 2 === 0 ? 1 : -1;
-            const offset = Math.floor((childCount + 1) / 2) * direction;
-            newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-            newY = (parentNode?.y || 0) + verticalSpacing;
-          } else {
-            // Odd index - position vertically with slight horizontal offset
-            const direction = Math.floor(childCount / 2) % 2 === 0 ? 1 : -1;
-            const offset = Math.floor(childCount / 2) * direction;
-            newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-            newY = (parentNode?.y || 0) + verticalSpacing;
-          }
+          const newX = (parentNode?.x || 0) + Math.cos(angle) * distance;
+          const newY = (parentNode?.y || 0) + Math.sin(angle) * distance;
           
           return {
             ...node,
@@ -297,7 +280,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
               ...node.children,
               {
                 id: newNodeId,
-                text: `${childCount + 1}. ${newNodeText}`,  // Add sequence number
+                text: newNodeText,
                 children: [],
                 x: newX,
                 y: newY,
@@ -318,12 +301,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         return node;
       };
       
-      const result = updateNode(prevMap);
-      
-      // Schedule a reorganization of the mind map to ensure proper spacing
-      setTimeout(() => reorganizeMindMap(), 10);
-      
-      return result;
+      return updateNode(prevMap);
     });
     
     closeModal();
@@ -360,55 +338,32 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         
         const updateNode = (node: NodeData): NodeData => {
           if (node.id === modal.nodeId) {
-            // Calculate positions for the new nodes in a tree structure
+            // Calculate positions for the new nodes
             const childCount = node.children.length;
             
-            // Create new AI-generated nodes with sequence numbers
             const newChildren = subtopics.map((topic, index) => {
-              const sequenceNumber = childCount + index + 1;
+              const angle = (Math.PI / 4) * (index + childCount);
+              const distance = 150;
               
-              // Create a B-tree structure with better spacing
-              // Use horizontal spacing for even-indexed children and vertical for odd-indexed
-              const horizontalSpacing = 450; // Further increased horizontal spacing
-              const verticalSpacing = 500;   // Further increased vertical spacing
-              
-              // Calculate position based on child index to create a balanced tree
-              let newX, newY;
-              
-              if ((childCount + index) % 2 === 0) {
-                // Even index - position horizontally
-                const direction = Math.floor((childCount + index) / 2) % 2 === 0 ? 1 : -1;
-                const offset = Math.floor(((childCount + index) + 1) / 2) * direction;
-                newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-                newY = (parentNode?.y || 0) + verticalSpacing;
-              } else {
-                // Odd index - position vertically with slight horizontal offset
-                const direction = Math.floor((childCount + index) / 2) % 2 === 0 ? 1 : -1;
-                const offset = Math.floor((childCount + index) / 2) * direction;
-                newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-                newY = (parentNode?.y || 0) + verticalSpacing;
-              }
+              const newX = (parentNode?.x || 0) + Math.cos(angle) * distance;
+              const newY = (parentNode?.y || 0) + Math.sin(angle) * distance;
               
               return {
                 id: `node-${Date.now()}-${index}`,
-                text: `${sequenceNumber}. ${topic}`,
+                text: topic,
                 children: [],
                 x: newX,
                 y: newY,
                 shape: selectedShape,
-                colorScheme: selectedColorScheme,
-                description: `Step ${childCount + index + 1} in the process`
+                colorScheme: selectedColorScheme
               };
             });
             
-            // Add the new nodes to children
-            const updatedNode = {
+            return {
               ...node,
               isCollapsed: false,
               children: [...node.children, ...newChildren],
             };
-            
-            return updatedNode;
           }
           
           if (node.children.length > 0) {
@@ -421,13 +376,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
           return node;
         };
         
-        // Update the mind map with the new AI-generated nodes
-        const updatedMap = updateNode(prevMap);
-        
-        // Reorganize the entire mind map to ensure proper B-tree structure
-        setTimeout(() => reorganizeMindMap(), 10);
-        
-        return updatedMap;
+        return updateNode(prevMap);
       });
     } catch (error) {
       console.error('Error generating AI nodes:', error);
@@ -435,124 +384,6 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     }
     
     closeModal();
-  };
-
-  // Function to reorganize the mind map to ensure proper spacing
-  // Use a stable positioning algorithm to prevent vibration
-  const reorganizeMindMap = () => {
-    // Create a cache to store node positions
-    const nodePositions = new Map<string, {x: number, y: number}>();
-    
-    setMindMap((prevMap) => {
-      if (!prevMap) return prevMap;
-      
-      // Calculate the total width needed for each level
-      const calculateLevelWidths = (node: NodeData, level = 0, levelWidths: Record<number, number> = {}) => {
-        // Initialize level width if not exists
-        if (!levelWidths[level]) levelWidths[level] = 0;
-        
-        // Add node width to level
-        const nodeWidth = node.shape === 'square' ? 120 : 180;
-        levelWidths[level] += nodeWidth;
-        
-        // Process children
-        if (node.children && node.children.length > 0) {
-          node.children.forEach(child => {
-            calculateLevelWidths(child, level + 1, levelWidths);
-          });
-        }
-        
-        return levelWidths;
-      };
-      
-      // Count nodes at each level
-      const countNodesPerLevel = (node: NodeData, level = 0, counts: Record<number, number> = {}) => {
-        // Initialize level count if not exists
-        if (!counts[level]) counts[level] = 0;
-        
-        // Increment count for this level
-        counts[level]++;
-        
-        // Process children
-        if (node.children && node.children.length > 0) {
-          node.children.forEach(child => {
-            countNodesPerLevel(child, level + 1, counts);
-          });
-        }
-        
-        return counts;
-      };
-      
-      // Get the counts of nodes at each level to use for spacing calculations
-      const levelCounts = countNodesPerLevel(prevMap);
-      
-      // Position nodes using a horizontal layout approach with even distribution
-      const positionNodes = (node: NodeData, level = 0, index = 0, totalAtLevel = 1): NodeData => {
-        // Check if we already have a stable position for this node
-        if (nodePositions.has(node.id)) {
-          const cachedPosition = nodePositions.get(node.id);
-          // Only use cached position if it exists and is not at origin
-          if (cachedPosition && (cachedPosition.x !== 0 || cachedPosition.y !== 0)) {
-            node.x = cachedPosition.x;
-            node.y = cachedPosition.y;
-          }
-        } else {
-          // Calculate a new stable position
-          // Base position for the root node
-          if (node.id === 'root') {
-            node.x = window.innerWidth / 2;
-            node.y = 150; // Position root node higher
-          } else {
-            // For non-root nodes, calculate position based on level and index
-            const verticalSpacing = 350; // Increased space between levels
-            
-            // Use level counts to determine appropriate spacing
-            // More nodes at a level means we need more width
-            const nodesAtThisLevel = levelCounts[level] || 1;
-            
-            // Calculate minimum width needed for this level based on number of nodes
-            // Ensure each node has at least 300px of horizontal space
-            const minWidthNeeded = nodesAtThisLevel * 300;
-            
-            // Use the larger of the calculated width or 80% of window width
-            const levelWidth = Math.max(window.innerWidth * 0.8, minWidthNeeded);
-            
-            // Calculate horizontal position - distribute nodes evenly across the level
-            const horizontalStep = levelWidth / totalAtLevel;
-            const startX = (window.innerWidth - levelWidth) / 2; // Center the level
-            
-            // Position this node with precise, stable positioning
-            // Use the index to calculate exact position without randomization
-            node.x = startX + (index + 0.5) * horizontalStep;
-            node.y = 150 + level * verticalSpacing;
-          }
-          
-          // Cache this position for future reference
-          nodePositions.set(node.id, {x: node.x || 0, y: node.y || 0});
-        }
-        
-        // Process children with proper spacing
-        if (node.children && node.children.length > 0) {
-          // Sort children by text to ensure consistent ordering
-          const sortedChildren = [...node.children].sort((a, b) => a.text.localeCompare(b.text));
-          
-          // Position each child
-          const updatedChildren = sortedChildren.map((child, childIndex) => {
-            return positionNodes(child, level + 1, childIndex, sortedChildren.length);
-          });
-          
-          return {
-            ...node,
-            children: updatedChildren
-          };
-        }
-        
-        return node;
-      };
-      
-      // Start reorganization from the root
-      return positionNodes(prevMap);
-    });
   };
 
   // Render the mind map nodes recursively
@@ -572,59 +403,11 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
           onContextMenu={(e: KonvaEventObject<MouseEvent>) => handleContextMenu(e, node.id)}
         />
         
-        {!node.isCollapsed && node.children.map((child) => {
-          // Calculate the start and end points for the connecting line
-          const parentX = node.x || 0;
-          const parentY = node.y || 0;
-          const childX = child.x || 0;
-          const childY = child.y || 0;
-          
-          // Determine node dimensions based on shape
-          const parentWidth = node.shape === 'square' ? 120 : 180;
-          const parentHeight = 80;
-          const childWidth = child.shape === 'square' ? 120 : 180;
-          // Node dimensions for calculations
-          
-          // Calculate connection points for a tree structure
-          // Start from the bottom center of the parent
-          const startX = parentX + parentWidth / 2;
-          const startY = parentY + parentHeight;
-          
-          // End at the top center of the child
-          const endX = childX + childWidth / 2;
-          const endY = childY;
-          
-          // Calculate control points for a curved bezier path
-          // The curve should be smooth and natural
-          const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-          const curveHeight = distance * 0.3; // Adjust curve height based on distance
-          
-          // First control point - below the parent node
-          const controlX1 = startX;
-          const controlY1 = startY + curveHeight;
-          
-          // Second control point - above the child node
-          const controlX2 = endX;
-          const controlY2 = endY - curveHeight;
-          
-          // Create a curved bezier path
-          const pathData = `M${startX},${startY} C${controlX1},${controlY1} ${controlX2},${controlY2} ${endX},${endY}`;
-          
-          return (
-            <React.Fragment key={child.id}>
-              {/* Draw curved connecting line */}
-              <Group>
-                <Path
-                  data={pathData}
-                  stroke={theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-3)'}
-                  strokeWidth={2}
-                  dash={[5, 2]}
-                />
-              </Group>
-              {renderNodes(child)}
-            </React.Fragment>
-          );
-        })}
+        {!node.isCollapsed && node.children.map((child) => (
+          <React.Fragment key={child.id}>
+            {renderNodes(child)}
+          </React.Fragment>
+        ))}
       </Group>
     );
   };
@@ -652,18 +435,6 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         });
     }
   };
-  
-  // Call reorganizeMindMap only when the component mounts
-  // or when specific properties of mindMap change that require reorganization
-  useEffect(() => {
-    if (mindMap) {
-      // Use a stable reference to the reorganize function
-      const timer = setTimeout(() => {
-        reorganizeMindMap();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [mindMap?.id, mindMap?.text]);
 
   // Generate learning path if it doesn't exist
   const handleGenerateLearningPath = async () => {
@@ -952,7 +723,6 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         scaleX={scale}
         scaleY={scale}
         onClick={closeContextMenu}
-        fill={theme === 'dark' ? '#222222' : '#ffffff'}
       >
         <Layer>
           {renderNodes(mindMap)}
@@ -990,12 +760,10 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-10 p-4 rounded-lg shadow-lg"
+            className="absolute z-10 bg-white p-4 rounded-lg shadow-lg"
             style={{
-              backgroundColor: theme === 'dark' ? '#333333' : 'white',
-              color: theme === 'dark' ? 'white' : 'black',
               top: modal.y,
-              left: modal.x
+              left: modal.x,
             }}
           >
             <div className="mb-4">

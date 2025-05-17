@@ -28,28 +28,8 @@ const Node: React.FC<NodeProps> = ({
 }) => {
   // Get color based on color scheme and node ID
   const getNodeColor = () => {
-    // Use a hash of the node ID to consistently pick colors
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const colorIndex = hash % 3; // 3 colors in each scheme
-    
-    if (colorScheme === 'dark') {
-      const darkColors = [
-        'var(--dark-blue)',
-        'var(--dark-green)',
-        'var(--dark-purple)'
-      ];
-      return darkColors[colorIndex];
-    } else if (colorScheme === 'vibrant') {
-      const vibrantColors = [
-        'var(--vibrant-blue)',
-        'var(--vibrant-green)',
-        'var(--vibrant-purple)'
-      ];
-      return vibrantColors[colorIndex];
-    }
-    
-    // Default fallback
-    return 'var(--dark-blue)';
+    // Always return the requested color #55E6A5
+    return '#55E6A5';
   };
 
   // Determine if this is the root node

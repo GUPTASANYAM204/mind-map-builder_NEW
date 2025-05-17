@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 // Import our components
@@ -26,6 +26,15 @@ function App() {
   const [mindMap, setMindMap] = useState<NodeData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>('dark');
+
+  // Apply dark mode class to body
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [theme]);
 
   const handleGenerateMap = async () => {
     if (!topic.trim()) return;
@@ -164,14 +173,14 @@ function App() {
     if (theme === 'dark') {
       return { 
         background: 'var(--dark-node-2)', 
-        minWidth: '120px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+        minWidth: '180px',
+        boxShadow: '0 8px 12px rgba(0, 0, 0, 0.5)'
       };
     } else { // vibrant
       return { 
         background: 'var(--vibrant-node-2)', 
-        minWidth: '120px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        minWidth: '180px',
+        boxShadow: '0 8px 12px rgba(0, 0, 0, 0.3)'
       };
     }
   };
@@ -192,19 +201,18 @@ function App() {
     >
       {/* Top Bar */}
       <header 
-        className="p-4 flex flex-col items-center shadow-md" 
+        className="p-6 flex flex-col items-center shadow-md" 
         style={getHeaderStyle()}
       >
-        <h1 className="text-2xl font-bold mb-4 font-poppins" style={{ color: theme === 'dark' ? 'white' : 'inherit' }}>Mind Map Builder</h1>
+        <h1 className="text-3xl font-bold mb-5 font-poppins" style={{ color: theme === 'dark' ? 'white' : 'inherit' }}>Mind Map Builder</h1>
         
         {/* Centered Search Box */}
-        <div className="flex items-center justify-center w-full max-w-2xl mb-4">
+        <div className="flex items-center justify-center w-full max-w-3xl mb-5">
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter a topic to learn (e.g., Python, Web Development)"
-            className="flex-1 p-3 rounded-l-lg border-0 outline-none font-poppins text-lg"
+            className="flex-1 p-4 rounded-l-lg border-0 outline-none font-poppins text-xl"
             style={{ 
               backgroundColor: theme === 'dark' ? 'var(--gray-700)' : 'white',
               color: theme === 'dark' ? 'white' : 'inherit'
@@ -212,7 +220,7 @@ function App() {
           />
           <button
             onClick={handleGenerateMap}
-            className="px-6 py-3 rounded-r-lg font-poppins flex items-center justify-center text-lg"
+            className="px-10 py-4 rounded-r-lg font-poppins flex items-center justify-center text-2xl font-bold w-full max-w-xs"
             disabled={isLoading}
             style={{ 
               ...getButtonStyle(),
@@ -229,7 +237,7 @@ function App() {
         <div className="flex justify-center space-x-4">
           <button
             onClick={handleExport}
-            className="px-4 py-2 rounded-lg font-poppins flex items-center"
+            className="px-6 py-3 rounded-lg font-poppins flex items-center text-lg font-semibold"
             style={{ 
               ...getExportButtonStyle(),
               color: 'white'

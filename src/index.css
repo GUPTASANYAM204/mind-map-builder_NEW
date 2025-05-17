@@ -32,10 +32,10 @@
   /* Dark theme */
   --dark-background: #2D3748;
   --dark-text: #FFFFFF;
-  --dark-topbar: #2D3748;
-  --dark-node-1: #4A5568;
-  --dark-node-2: #5B8BA0;
-  --dark-node-3: #6B7280;
+  --dark-topbar: #02050A;
+  --dark-node-1: #55E6A5;
+  --dark-node-2: #55E6A5;
+  --dark-node-3: #55E6A5;
   
   /* Vibrant theme */
   --vibrant-background: #EBF8FF;

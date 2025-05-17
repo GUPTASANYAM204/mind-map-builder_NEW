@@ -7,6 +7,8 @@ export interface LearningPathNode {
   description: string;
   resources?: string[];
   timeEstimate?: string;
+  milestones?: string[];
+  prerequisites?: string[];
 }
 
 // Interface for mind map node structure
@@ -377,31 +379,97 @@ async function simulateLearningPathResponse(topic: string): Promise<LearningPath
     ];
   }
   
-  // Generic learning path for other topics
+  // Generic learning path for other topics with more detailed information
   return [
     {
       title: 'Fundamentals',
-      description: `Learn the core concepts and principles of ${topic}.`,
-      resources: ['Online courses', 'Beginner-friendly books', 'Tutorial videos'],
-      timeEstimate: '4-6 weeks'
+      description: `Master the core concepts and principles of ${topic}. Start with basic terminology, key theories, and foundational knowledge. Focus on building a strong conceptual understanding before moving to more complex topics.`,
+      resources: [
+        'Beginner-friendly textbooks and reference guides', 
+        'Introductory online courses on platforms like Coursera, edX, or Udemy',
+        'YouTube tutorial series covering basics',
+        'Interactive learning platforms with hands-on exercises'
+      ],
+      timeEstimate: '4-6 weeks',
+      milestones: [
+        'Understand basic terminology and concepts',
+        'Complete introductory exercises and quizzes',
+        'Build simple projects applying fundamental principles',
+        'Join community forums and discussion groups'
+      ],
+      prerequisites: ['Basic computer literacy', 'Self-motivation and consistency']
     },
     {
-      title: 'Practical Skills',
-      description: 'Apply your knowledge through hands-on projects and exercises.',
-      resources: ['Project-based tutorials', 'Practice platforms'],
-      timeEstimate: '6-8 weeks'
+      title: 'Practical Skills Development',
+      description: `Apply your knowledge through structured projects and real-world exercises. This phase focuses on translating theoretical knowledge into practical skills. You'll work on increasingly complex projects that simulate real-world scenarios.`,
+      resources: [
+        'Project-based learning platforms like Codecademy Pro or DataCamp',
+        'GitHub repositories with sample projects and exercises',
+        'Medium articles and tutorials on practical applications',
+        'Workshops and webinars focusing on hands-on skills'
+      ],
+      timeEstimate: '6-8 weeks',
+      milestones: [
+        'Complete 3-5 medium-complexity projects',
+        'Troubleshoot common problems independently',
+        'Implement best practices in your work',
+        'Receive and incorporate feedback from peers or mentors'
+      ],
+      prerequisites: ['Completion of Fundamentals phase', 'Basic problem-solving skills']
     },
     {
-      title: 'Advanced Concepts',
-      description: 'Deepen your understanding with more complex topics and techniques.',
-      resources: ['Advanced books', 'Specialized courses'],
-      timeEstimate: '8-12 weeks'
+      title: 'Advanced Concepts & Techniques',
+      description: `Deepen your understanding with more complex topics, optimization techniques, and advanced methodologies. This phase explores cutting-edge approaches and helps you develop expertise in specific areas of ${topic}.`,
+      resources: [
+        'Advanced textbooks and academic papers',
+        'Specialized courses taught by industry experts',
+        'Conference recordings and technical talks',
+        'Case studies of complex implementations'
+      ],
+      timeEstimate: '8-12 weeks',
+      milestones: [
+        'Understand and implement advanced techniques',
+        'Analyze and optimize existing solutions',
+        'Contribute to open-source projects or community resources',
+        'Create comprehensive documentation for your work'
+      ],
+      prerequisites: ['Strong practical skills', 'Ability to research independently']
     },
     {
-      title: 'Specialization',
-      description: 'Focus on specific areas of interest within the broader field.',
-      resources: ['Industry blogs', 'Specialized communities'],
-      timeEstimate: '12+ weeks'
+      title: 'Specialization & Expertise',
+      description: `Focus on specific areas of interest within ${topic} to develop deep expertise. This phase involves choosing a specialization path and becoming an authority in that niche through focused study and project work.`,
+      resources: [
+        'Industry-specific blogs and publications',
+        'Specialized communities and forums',
+        'Advanced certification programs',
+        'Mentorship from experts in the field'
+      ],
+      timeEstimate: '12+ weeks',
+      milestones: [
+        'Develop and share original insights or techniques',
+        'Build a portfolio showcasing your expertise',
+        'Mentor others in your area of specialization',
+        'Stay current with emerging trends and research'
+      ],
+      prerequisites: ['Mastery of advanced concepts', 'Clear understanding of industry needs']
+    },
+    {
+      title: 'Professional Application & Growth',
+      description: `Apply your expertise in professional settings and continue growing through continuous learning and adaptation. This phase focuses on real-world application, collaboration, and staying current in a rapidly evolving field.`,
+      resources: [
+        'Professional networking platforms like LinkedIn',
+        'Industry conferences and meetups',
+        'Subscription-based learning platforms for continuous education',
+        'Professional certification programs'
+      ],
+      timeEstimate: 'Ongoing',
+      milestones: [
+        'Successfully apply skills in professional projects',
+        'Build a professional network in your field',
+        'Contribute to the broader community through teaching or content creation',
+        'Adapt to new technologies and methodologies as they emerge'
+      ],
+      prerequisites: ['Specialized expertise', 'Professional communication skills']
     }
   ];
 }
