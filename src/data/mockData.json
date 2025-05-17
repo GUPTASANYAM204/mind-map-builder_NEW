@@ -1,0 +1,76 @@
+{
+  "topics": {
+    "Learn Python": [
+      "Basics",
+      "Data Structures",
+      "Libraries",
+      "Web Frameworks",
+      "Data Science"
+    ],
+    "Build a Web App": [
+      "Frontend",
+      "Backend",
+      "Deployment",
+      "Testing",
+      "Security"
+    ],
+    "Study Biology": [
+      "Cell Structure",
+      "Genetics",
+      "Evolution",
+      "Ecology",
+      "Physiology"
+    ],
+    "Design a Database": [
+      "Data Modeling",
+      "Normalization",
+      "SQL",
+      "Indexing",
+      "Performance"
+    ],
+    "subtopics": {
+      "Basics": [
+        "Variables",
+        "Data Types",
+        "Control Flow",
+        "Functions",
+        "Error Handling"
+      ],
+      "Data Structures": [
+        "Lists",
+        "Dictionaries",
+        "Sets",
+        "Tuples",
+        "Arrays"
+      ],
+      "Libraries": [
+        "NumPy",
+        "Pandas",
+        "Matplotlib",
+        "Requests",
+        "BeautifulSoup"
+      ],
+      "Frontend": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React",
+        "UI/UX Design"
+      ],
+      "Backend": [
+        "Server",
+        "API",
+        "Database",
+        "Authentication",
+        "Business Logic"
+      ],
+      "Deployment": [
+        "Hosting",
+        "CI/CD",
+        "Containerization",
+        "Scaling",
+        "Monitoring"
+      ]
+    }
+  }
+}

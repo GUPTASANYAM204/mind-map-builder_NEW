@@ -1,0 +1,387 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Theme colors - will be used based on selected theme */
+  --background-color: var(--modern-background);
+  --text-color: var(--modern-text);
+  --topbar-background: var(--modern-topbar);
+  --node-color-1: var(--modern-node-1);
+  --node-color-2: var(--modern-node-2);
+  --node-color-3: var(--modern-node-3);
+  
+  /* Modern dark theme (default) */
+  --modern-background: #0F1419;
+  --modern-text: #FFFFFF;
+  --modern-topbar: #161B22;
+  --modern-node-1: #4AE3B5; /* Vibrant green */
+  --modern-node-2: #2D3748; /* Dark slate */
+  --modern-node-3: #3A506B; /* Navy blue */
+  --modern-accent: #4AE3B5; /* Vibrant green accent */
+  --modern-card-bg: #1A202C; /* Slightly lighter than background */
+  --modern-hover: #2D3748; /* Hover state */
+  --modern-gradient: linear-gradient(135deg, #4AE3B5, #2C8D99);
+  
+  /* Pastel theme */
+  --pastel-background: #F7FAFC;
+  --pastel-text: #2D3748;
+  --pastel-topbar: #AEC6CF;
+  --pastel-node-1: #AEC6CF;
+  --pastel-node-2: #B5EAD7;
+  --pastel-node-3: #E0C3FC;
+  
+  /* Dark theme */
+  --dark-background: #2D3748;
+  --dark-text: #FFFFFF;
+  --dark-topbar: #2D3748;
+  --dark-node-1: #4A5568;
+  --dark-node-2: #5B8BA0;
+  --dark-node-3: #6B7280;
+  
+  /* Vibrant theme */
+  --vibrant-background: #EBF8FF;
+  --vibrant-text: #2D3748;
+  --vibrant-topbar-gradient: linear-gradient(to right, #4299E1, #48BB78);
+  --vibrant-node-1: #F56565;
+  --vibrant-node-2: #48BB78;
+  --vibrant-node-3: #9F7AEA;
+  
+  /* Original pastel colors (keeping for backward compatibility) */
+  --pastel-blue: #AEC6CF;
+  --pastel-green: #B5EAD7;
+  --pastel-purple: #E0C3FC;
+  
+  /* Darker variants */
+  --dark-blue: #5B8BA0;
+  --dark-green: #6BA88A;
+  --dark-purple: #A76FC9;
+  
+  /* Vibrant variants */
+  --vibrant-blue: #4A9DFF;
+  --vibrant-green: #4AD991;
+  --vibrant-purple: #B45AFF;
+  
+  /* Gradient definitions */
+  --gradient-blue: linear-gradient(135deg, var(--pastel-blue), var(--dark-blue));
+  --gradient-green: linear-gradient(135deg, var(--pastel-green), var(--dark-green));
+  --gradient-purple: linear-gradient(135deg, var(--pastel-purple), var(--dark-purple));
+  --gradient-blue-green: linear-gradient(135deg, var(--vibrant-blue), var(--vibrant-green));
+  --gradient-purple-blue: linear-gradient(135deg, var(--vibrant-purple), var(--vibrant-blue));
+  
+  /* Grayscale */
+  --white: #FFFFFF;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  
+  /* Node shapes */
+  --border-radius-circle: 50%;
+  --border-radius-rounded: 8px;
+  --border-radius-pill: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Layout */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.w-screen {
+  width: 100vw;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.max-w-md {
+  max-width: 28rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.mr-4 {
+  margin-right: 1rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Typography */
+.text-center {
+  text-align: center;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Colors */
+.bg-pastel-blue {
+  background-color: var(--pastel-blue);
+}
+
+.bg-pastel-green {
+  background-color: var(--pastel-green);
+}
+
+.bg-pastel-purple {
+  background-color: var(--pastel-purple);
+}
+
+.bg-white {
+  background-color: var(--white);
+}
+
+.bg-gray-50 {
+  background-color: var(--gray-50);
+}
+
+.bg-gray-200 {
+  background-color: var(--gray-200);
+}
+
+.text-white {
+  color: var(--white);
+}
+
+.text-gray-500 {
+  color: var(--gray-500);
+}
+
+.text-gray-700 {
+  color: var(--gray-700);
+}
+
+/* Components */
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-l-lg {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.rounded-r-lg {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.border-0 {
+  border: 0;
+}
+
+.outline-none {
+  outline: none;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Interactive elements */
+button {
+  cursor: pointer;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input {
+  font-family: 'Poppins', sans-serif;
+}
+
+input:focus {
+  outline: 2px solid var(--pastel-purple);
+}
+
+/* Node specific styles */
+.node-circle {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node-circle:hover {
+  transform: scale(1.05);
+}
+
+/* Context menu styles */
+.context-menu {
+  position: absolute;
+  z-index: 10;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.context-menu-item:hover {
+  background-color: var(--gray-100);
+}
+
+/* Canvas container */
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Animation classes */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal animations */
+.modal-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.modal-exit {
+  opacity: 1;
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+}
