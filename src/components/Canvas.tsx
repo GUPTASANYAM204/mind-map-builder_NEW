@@ -7,10 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateLearningPath } from '../services/aiService';
 import type { LearningPathNode } from '../services/aiService';
 
-// Theme type definition
-export type ThemeMode = 'dark' | 'vibrant';
+type ThemeMode = 'dark' | 'vibrant';
 
-// Define types for our mind map data
 interface NodeData {
   id: string;
   text: string;
@@ -46,7 +44,21 @@ interface ModalState {
   y: number;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', setTheme }) => {
+// Constants for layout
+const NODE_SPACING = {
+  HORIZONTAL: 450,
+  VERTICAL: 500,
+  NODE_WIDTH: 300,
+  NODE_HEIGHT: 80
+};
+
+const Canvas: React.FC<CanvasProps> = ({ 
+  mindMap, 
+  setMindMap, 
+  theme = 'dark', 
+  setTheme 
+}) => {
+  // State management
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -68,10 +80,12 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
   const [learningPath, setLearningPath] = useState<LearningPathNode[] | null>(null);
   const [showLearningPath, setShowLearningPath] = useState(false);
   const [isLoadingLearningPath, setIsLoadingLearningPath] = useState(false);
+  
+  // Refs
   const stageRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Update stage dimensions on window resize
+  // Effect for window resize handling
   useEffect(() => {
     const handleResize = () => {
       if (stageRef.current && containerRef.current) {
@@ -83,20 +97,25 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     handleResize();
     window.addEventListener('resize', handleResize);
     
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Handle wheel events for zooming
+  // Effect for initial mind map organization
+  useEffect(() => {
+    if (mindMap) {
+      const timer = setTimeout(() => reorganizeMindMap(), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mindMap?.id, mindMap?.text]);
+
+  // Zoom handling
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
-    
     const scaleBy = 1.1;
     const stage = stageRef.current;
     const oldScale = stage.scaleX();
-    
     const pointerPosition = stage.getPointerPosition();
+    
     const mousePointTo = {
       x: (pointerPosition.x - stage.x()) / oldScale,
       y: (pointerPosition.y - stage.y()) / oldScale,
@@ -111,39 +130,27 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     });
   };
 
-  // Find a node by ID in the mind map tree
+  // Node operations
   const findNodeById = (nodes: NodeData[], id: string): NodeData | null => {
     for (const node of nodes) {
-      if (node.id === id) {
-        return node;
-      }
+      if (node.id === id) return node;
       if (node.children.length > 0) {
         const foundNode = findNodeById(node.children, id);
-        if (foundNode) {
-          return foundNode;
-        }
+        if (foundNode) return foundNode;
       }
     }
     return null;
   };
 
-  // Update a node's position in the mind map tree
   const updateNodePosition = (nodeId: string, x: number, y: number) => {
-    setMindMap((prevMap) => {
+    setMindMap(prevMap => {
       if (!prevMap) return prevMap;
       
       const updateNode = (node: NodeData): NodeData => {
-        if (node.id === nodeId) {
-          return { ...node, x, y };
-        }
-        
+        if (node.id === nodeId) return { ...node, x, y };
         if (node.children.length > 0) {
-          return {
-            ...node,
-            children: node.children.map(updateNode),
-          };
+          return { ...node, children: node.children.map(updateNode) };
         }
-        
         return node;
       };
       
@@ -151,11 +158,10 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     });
   };
 
-  // Handle context menu for a node
-  const handleContextMenu = (e: KonvaEventObject<MouseEvent>, nodeId: string) => {
+  // Context menu handlers
+  const showContextMenu = (e: KonvaEventObject<MouseEvent>, nodeId: string) => {
     e.evt.preventDefault();
-    const stage = stageRef.current;
-    const pointerPosition = stage.getPointerPosition();
+    const pointerPosition = stageRef.current.getPointerPosition();
     
     setContextMenu({
       visible: true,
@@ -165,24 +171,15 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     });
   };
 
-  // Close the context menu
   const closeContextMenu = () => {
-    setContextMenu({
-      visible: false,
-      x: 0,
-      y: 0,
-      nodeId: null,
-    });
+    setContextMenu({ visible: false, x: 0, y: 0, nodeId: null });
   };
 
-  // Handle expanding a node
   const handleExpand = () => {
     if (!contextMenu.nodeId) return;
     
     closeContextMenu();
-    
-    const stage = stageRef.current;
-    const pointerPosition = stage.getPointerPosition();
+    const pointerPosition = stageRef.current.getPointerPosition();
     
     setModal({
       visible: true,
@@ -192,25 +189,19 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     });
   };
 
-  // Handle collapsing a node
   const handleCollapse = () => {
     if (!contextMenu.nodeId) return;
     
-    setMindMap((prevMap) => {
+    setMindMap(prevMap => {
       if (!prevMap) return prevMap;
       
       const updateNode = (node: NodeData): NodeData => {
         if (node.id === contextMenu.nodeId) {
           return { ...node, isCollapsed: !node.isCollapsed };
         }
-        
         if (node.children.length > 0) {
-          return {
-            ...node,
-            children: node.children.map(updateNode),
-          };
+          return { ...node, children: node.children.map(updateNode) };
         }
-        
         return node;
       };
       
@@ -220,21 +211,18 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     closeContextMenu();
   };
 
-  // Handle deleting a node
   const handleDelete = () => {
     if (!contextMenu.nodeId || contextMenu.nodeId === 'root') return;
     
-    setMindMap((prevMap) => {
+    setMindMap(prevMap => {
       if (!prevMap) return prevMap;
       
-      const deleteNode = (node: NodeData): NodeData => {
-        return {
-          ...node,
-          children: node.children
-            .filter((child) => child.id !== contextMenu.nodeId)
-            .map(deleteNode),
-        };
-      };
+      const deleteNode = (node: NodeData): NodeData => ({
+        ...node,
+        children: node.children
+          .filter(child => child.id !== contextMenu.nodeId)
+          .map(deleteNode),
+      });
       
       return deleteNode(prevMap);
     });
@@ -242,54 +230,36 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     closeContextMenu();
   };
 
-  // Close the modal
+  // Modal operations
   const closeModal = () => {
-    setModal({
-      visible: false,
-      nodeId: null,
-      x: 0,
-      y: 0,
-    });
+    setModal({ visible: false, nodeId: null, x: 0, y: 0 });
     setNewNodeText('');
   };
 
-  // Handle adding a manual node
+  const calculateNewNodePosition = (parentNode: NodeData | null) => {
+    if (!parentNode) return { x: 0, y: 0 };
+    
+    // For new nodes, we'll place them temporarily to the right of the parent
+    // The reorganizeMindMap function will properly position them later
+    return {
+      x: (parentNode.x || 0) + NODE_SPACING.HORIZONTAL,
+      y: (parentNode.y || 0) + NODE_SPACING.VERTICAL
+    };
+  };
+
   const handleAddManualNode = () => {
     if (!modal.nodeId || !newNodeText.trim()) return;
     
     const newNodeId = `node-${Date.now()}`;
+    const parentNode = findNodeById([mindMap], modal.nodeId);
+    const nodeIndex = parentNode?.children.length || 0;
+    const { x, y } = calculateNewNodePosition(parentNode);
     
-    setMindMap((prevMap) => {
+    setMindMap(prevMap => {
       if (!prevMap) return prevMap;
       
       const updateNode = (node: NodeData): NodeData => {
         if (node.id === modal.nodeId) {
-          // Calculate position for the new node
-          const parentNode = findNodeById([prevMap], modal.nodeId);
-          const childCount = node.children.length;
-          
-          // Create a B-tree structure with better spacing
-          // Use horizontal spacing for even-indexed children and vertical for odd-indexed
-          const horizontalSpacing = 450; // Further increased horizontal spacing
-          const verticalSpacing = 500;   // Further increased vertical spacing
-          
-          // Calculate position based on child index to create a balanced tree
-          let newX, newY;
-          
-          if (childCount % 2 === 0) {
-            // Even index - position horizontally
-            const direction = Math.floor(childCount / 2) % 2 === 0 ? 1 : -1;
-            const offset = Math.floor((childCount + 1) / 2) * direction;
-            newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-            newY = (parentNode?.y || 0) + verticalSpacing;
-          } else {
-            // Odd index - position vertically with slight horizontal offset
-            const direction = Math.floor(childCount / 2) % 2 === 0 ? 1 : -1;
-            const offset = Math.floor(childCount / 2) * direction;
-            newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-            newY = (parentNode?.y || 0) + verticalSpacing;
-          }
-          
           return {
             ...node,
             isCollapsed: false,
@@ -297,10 +267,10 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
               ...node.children,
               {
                 id: newNodeId,
-                text: `${childCount + 1}. ${newNodeText}`,  // Add sequence number
+                text: `${nodeIndex + 1}. ${newNodeText}`,
                 children: [],
-                x: newX,
-                y: newY,
+                x,
+                y,
                 shape: selectedShape,
                 colorScheme: selectedColorScheme
               },
@@ -309,310 +279,245 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         }
         
         if (node.children.length > 0) {
-          return {
-            ...node,
-            children: node.children.map(updateNode),
-          };
+          return { ...node, children: node.children.map(updateNode) };
         }
         
         return node;
       };
       
       const result = updateNode(prevMap);
-      
-      // Schedule a reorganization of the mind map to ensure proper spacing
       setTimeout(() => reorganizeMindMap(), 10);
-      
       return result;
     });
     
     closeModal();
   };
 
-  // Handle generating AI nodes using our AI service
   const handleGenerateAINodes = async () => {
     if (!modal.nodeId) return;
     
-    // Find the node to generate subtopics for
     const parentNode = findNodeById([mindMap], modal.nodeId || '');
     if (!parentNode) return;
     
     try {
-      // Import dynamically to avoid issues with SSR
       const { generateSubtopics } = await import('../services/aiService');
       const subtopics = await generateSubtopics(parentNode.text);
       
-      // Also fetch a learning path if this is the root node
       if (parentNode.id === 'root' && !learningPath) {
         try {
           setIsLoadingLearningPath(true);
           const path = await generateLearningPath(parentNode.text);
           setLearningPath(path);
-          setIsLoadingLearningPath(false);
         } catch (error) {
           console.error('Error generating learning path:', error);
+        } finally {
           setIsLoadingLearningPath(false);
         }
       }
       
-      setMindMap((prevMap) => {
+      setMindMap(prevMap => {
         if (!prevMap) return prevMap;
         
         const updateNode = (node: NodeData): NodeData => {
           if (node.id === modal.nodeId) {
-            // Calculate positions for the new nodes in a tree structure
             const childCount = node.children.length;
             
-            // Create new AI-generated nodes with sequence numbers
             const newChildren = subtopics.map((topic, index) => {
               const sequenceNumber = childCount + index + 1;
-              
-              // Create a B-tree structure with better spacing
-              // Use horizontal spacing for even-indexed children and vertical for odd-indexed
-              const horizontalSpacing = 450; // Further increased horizontal spacing
-              const verticalSpacing = 500;   // Further increased vertical spacing
-              
-              // Calculate position based on child index to create a balanced tree
-              let newX, newY;
-              
-              if ((childCount + index) % 2 === 0) {
-                // Even index - position horizontally
-                const direction = Math.floor((childCount + index) / 2) % 2 === 0 ? 1 : -1;
-                const offset = Math.floor(((childCount + index) + 1) / 2) * direction;
-                newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-                newY = (parentNode?.y || 0) + verticalSpacing;
-              } else {
-                // Odd index - position vertically with slight horizontal offset
-                const direction = Math.floor((childCount + index) / 2) % 2 === 0 ? 1 : -1;
-                const offset = Math.floor((childCount + index) / 2) * direction;
-                newX = (parentNode?.x || 0) + (offset * horizontalSpacing);
-                newY = (parentNode?.y || 0) + verticalSpacing;
-              }
+              const { x, y } = calculateNewNodePosition(parentNode);
               
               return {
                 id: `node-${Date.now()}-${index}`,
                 text: `${sequenceNumber}. ${topic}`,
                 children: [],
-                x: newX,
-                y: newY,
+                x,
+                y,
                 shape: selectedShape,
                 colorScheme: selectedColorScheme,
                 description: `Step ${childCount + index + 1} in the process`
               };
             });
             
-            // Add the new nodes to children
-            const updatedNode = {
+            return {
               ...node,
               isCollapsed: false,
               children: [...node.children, ...newChildren],
             };
-            
-            return updatedNode;
           }
           
           if (node.children.length > 0) {
-            return {
-              ...node,
-              children: node.children.map(updateNode),
-            };
+            return { ...node, children: node.children.map(updateNode) };
           }
           
           return node;
         };
         
-        // Update the mind map with the new AI-generated nodes
         const updatedMap = updateNode(prevMap);
-        
-        // Reorganize the entire mind map to ensure proper B-tree structure
         setTimeout(() => reorganizeMindMap(), 10);
-        
         return updatedMap;
       });
     } catch (error) {
       console.error('Error generating AI nodes:', error);
-      // Could add a toast notification here in a more complete implementation
     }
     
     closeModal();
   };
 
-  // Function to reorganize the mind map to ensure proper spacing
-  // Use a stable positioning algorithm to prevent vibration
+  // Mind map organization with improved tree layout
   const reorganizeMindMap = () => {
-    // Create a cache to store node positions
     const nodePositions = new Map<string, {x: number, y: number}>();
     
-    setMindMap((prevMap) => {
+    setMindMap(prevMap => {
       if (!prevMap) return prevMap;
       
-      // Calculate the total width needed for each level
-      const calculateLevelWidths = (node: NodeData, level = 0, levelWidths: Record<number, number> = {}) => {
-        // Initialize level width if not exists
-        if (!levelWidths[level]) levelWidths[level] = 0;
-        
-        // Add node width to level
+      // First pass: collect information about the tree structure
+      interface NodeInfo {
+        width: number;
+        height: number;
+        subtreeWidth: number;
+        children: NodeInfo[];
+        node: NodeData;
+      }
+      
+      // Calculate the width needed for each subtree
+      const calculateNodeInfo = (node: NodeData): NodeInfo => {
         const nodeWidth = node.shape === 'square' ? 120 : 180;
-        levelWidths[level] += nodeWidth;
+        const nodeHeight = NODE_SPACING.NODE_HEIGHT;
         
-        // Process children
-        if (node.children && node.children.length > 0) {
-          node.children.forEach(child => {
-            calculateLevelWidths(child, level + 1, levelWidths);
-          });
-        }
-        
-        return levelWidths;
-      };
-      
-      // Count nodes at each level
-      const countNodesPerLevel = (node: NodeData, level = 0, counts: Record<number, number> = {}) => {
-        // Initialize level count if not exists
-        if (!counts[level]) counts[level] = 0;
-        
-        // Increment count for this level
-        counts[level]++;
-        
-        // Process children
-        if (node.children && node.children.length > 0) {
-          node.children.forEach(child => {
-            countNodesPerLevel(child, level + 1, counts);
-          });
-        }
-        
-        return counts;
-      };
-      
-      // Get the counts of nodes at each level to use for spacing calculations
-      const levelCounts = countNodesPerLevel(prevMap);
-      
-      // Position nodes using a horizontal layout approach with even distribution
-      const positionNodes = (node: NodeData, level = 0, index = 0, totalAtLevel = 1): NodeData => {
-        // Check if we already have a stable position for this node
-        if (nodePositions.has(node.id)) {
-          const cachedPosition = nodePositions.get(node.id);
-          // Only use cached position if it exists and is not at origin
-          if (cachedPosition && (cachedPosition.x !== 0 || cachedPosition.y !== 0)) {
-            node.x = cachedPosition.x;
-            node.y = cachedPosition.y;
-          }
-        } else {
-          // Calculate a new stable position
-          // Base position for the root node
-          if (node.id === 'root') {
-            node.x = window.innerWidth / 2;
-            node.y = 150; // Position root node higher
-          } else {
-            // For non-root nodes, calculate position based on level and index
-            const verticalSpacing = 350; // Increased space between levels
-            
-            // Use level counts to determine appropriate spacing
-            // More nodes at a level means we need more width
-            const nodesAtThisLevel = levelCounts[level] || 1;
-            
-            // Calculate minimum width needed for this level based on number of nodes
-            // Ensure each node has at least 300px of horizontal space
-            const minWidthNeeded = nodesAtThisLevel * 300;
-            
-            // Use the larger of the calculated width or 80% of window width
-            const levelWidth = Math.max(window.innerWidth * 0.8, minWidthNeeded);
-            
-            // Calculate horizontal position - distribute nodes evenly across the level
-            const horizontalStep = levelWidth / totalAtLevel;
-            const startX = (window.innerWidth - levelWidth) / 2; // Center the level
-            
-            // Position this node with precise, stable positioning
-            // Use the index to calculate exact position without randomization
-            node.x = startX + (index + 0.5) * horizontalStep;
-            node.y = 150 + level * verticalSpacing;
-          }
-          
-          // Cache this position for future reference
-          nodePositions.set(node.id, {x: node.x || 0, y: node.y || 0});
-        }
-        
-        // Process children with proper spacing
-        if (node.children && node.children.length > 0) {
-          // Sort children by text to ensure consistent ordering
-          const sortedChildren = [...node.children].sort((a, b) => a.text.localeCompare(b.text));
-          
-          // Position each child
-          const updatedChildren = sortedChildren.map((child, childIndex) => {
-            return positionNodes(child, level + 1, childIndex, sortedChildren.length);
-          });
-          
+        if (node.isCollapsed || node.children.length === 0) {
           return {
-            ...node,
-            children: updatedChildren
+            width: nodeWidth,
+            height: nodeHeight,
+            subtreeWidth: nodeWidth,
+            children: [],
+            node
           };
         }
         
-        return node;
+        // Sort children for consistent layout
+        const sortedChildren = [...node.children].sort((a, b) => 
+          a.text.localeCompare(b.text)
+        );
+        
+        // Calculate info for all children
+        const childrenInfo = sortedChildren.map(calculateNodeInfo);
+        
+        // Calculate total width needed for children
+        // We add spacing between each child
+        let totalChildrenWidth = 0;
+        childrenInfo.forEach(childInfo => {
+          totalChildrenWidth += childInfo.subtreeWidth;
+        });
+        
+        // Add spacing between children
+        if (childrenInfo.length > 1) {
+          totalChildrenWidth += (childrenInfo.length - 1) * (NODE_SPACING.HORIZONTAL / 2);
+        }
+        
+        // The subtree width is the max of the node width and total children width
+        const subtreeWidth = Math.max(nodeWidth, totalChildrenWidth);
+        
+        return {
+          width: nodeWidth,
+          height: nodeHeight,
+          subtreeWidth,
+          children: childrenInfo,
+          node
+        };
       };
       
-      // Start reorganization from the root
-      return positionNodes(prevMap);
+      // Second pass: position nodes based on calculated widths
+      const positionNodes = (
+        nodeInfo: NodeInfo, 
+        x: number,
+        y: number,
+        level: number
+      ): NodeData => {
+        const node = nodeInfo.node;
+        
+        // Position this node
+        node.x = x;
+        node.y = y;
+        
+        // Cache position
+        nodePositions.set(node.id, {x, y});
+        
+        // If collapsed or no children, we're done
+        if (node.isCollapsed || nodeInfo.children.length === 0) {
+          return node;
+        }
+        
+        // Calculate starting x position for children
+        // Center the children under the parent
+        let childX = x - (nodeInfo.subtreeWidth / 2) + (nodeInfo.children[0].subtreeWidth / 2);
+        const childY = y + NODE_SPACING.VERTICAL;
+        
+        // Position each child
+        const updatedChildren = nodeInfo.children.map(childInfo => {
+          const childNode = positionNodes(childInfo, childX, childY, level + 1);
+          
+          // Move to next position
+          childX += childInfo.subtreeWidth + (NODE_SPACING.HORIZONTAL / 2);
+          
+          return childNode;
+        });
+        
+        return {
+          ...node,
+          children: updatedChildren
+        };
+      };
+      
+      // Start the layout process
+      const rootInfo = calculateNodeInfo(prevMap);
+      return positionNodes(rootInfo, window.innerWidth / 2, 150, 0);
     });
   };
 
-  // Render the mind map nodes recursively
+  // Node rendering
   const renderNodes = (node: NodeData) => {
     if (!node) return null;
+    
+    const parentX = node.x || 0;
+    const parentY = node.y || 0;
+    const parentWidth = node.shape === 'square' ? 120 : 180;
+    const parentHeight = NODE_SPACING.NODE_HEIGHT;
     
     return (
       <Group key={node.id}>
         <Node
           id={node.id}
           text={node.text}
-          x={node.x || 0}
-          y={node.y || 0}
+          x={parentX}
+          y={parentY}
           shape={node.shape || selectedShape}
           colorScheme={node.colorScheme || selectedColorScheme}
-          onDragEnd={(x: number, y: number) => updateNodePosition(node.id, x, y)}
-          onContextMenu={(e: KonvaEventObject<MouseEvent>) => handleContextMenu(e, node.id)}
+          onDragEnd={(x, y) => updateNodePosition(node.id, x, y)}
+          onContextMenu={(e) => showContextMenu(e, node.id)}
         />
         
         {!node.isCollapsed && node.children.map((child) => {
-          // Calculate the start and end points for the connecting line
-          const parentX = node.x || 0;
-          const parentY = node.y || 0;
           const childX = child.x || 0;
           const childY = child.y || 0;
-          
-          // Determine node dimensions based on shape
-          const parentWidth = node.shape === 'square' ? 120 : 180;
-          const parentHeight = 80;
           const childWidth = child.shape === 'square' ? 120 : 180;
-          // Node dimensions for calculations
           
-          // Calculate connection points for a tree structure
-          // Start from the bottom center of the parent
           const startX = parentX + parentWidth / 2;
           const startY = parentY + parentHeight;
-          
-          // End at the top center of the child
           const endX = childX + childWidth / 2;
           const endY = childY;
           
-          // Calculate control points for a curved bezier path
-          // The curve should be smooth and natural
           const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-          const curveHeight = distance * 0.3; // Adjust curve height based on distance
+          const curveHeight = distance * 0.3;
           
-          // First control point - below the parent node
           const controlX1 = startX;
           const controlY1 = startY + curveHeight;
-          
-          // Second control point - above the child node
           const controlX2 = endX;
           const controlY2 = endY - curveHeight;
           
-          // Create a curved bezier path
           const pathData = `M${startX},${startY} C${controlX1},${controlY1} ${controlX2},${controlY2} ${endX},${endY}`;
           
           return (
             <React.Fragment key={child.id}>
-              {/* Draw curved connecting line */}
               <Group>
                 <Path
                   data={pathData}
@@ -629,16 +534,12 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     );
   };
 
-  // Toggle settings panel
-  const toggleSettings = () => {
-    setShowSettings(!showSettings);
-  };
+  // Panel toggles
+  const toggleSettings = () => setShowSettings(!showSettings);
   
-  // Toggle learning path panel
   const toggleLearningPath = () => {
     setShowLearningPath(!showLearningPath);
     
-    // If we're showing the learning path and don't have one yet, try to generate it
     if (!showLearningPath && !learningPath && mindMap) {
       setIsLoadingLearningPath(true);
       generateLearningPath(mindMap.text)
@@ -653,19 +554,6 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     }
   };
   
-  // Call reorganizeMindMap only when the component mounts
-  // or when specific properties of mindMap change that require reorganization
-  useEffect(() => {
-    if (mindMap) {
-      // Use a stable reference to the reorganize function
-      const timer = setTimeout(() => {
-        reorganizeMindMap();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [mindMap?.id, mindMap?.text]);
-
-  // Generate learning path if it doesn't exist
   const handleGenerateLearningPath = async () => {
     if (!learningPath && mindMap) {
       try {
@@ -680,151 +568,103 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
     }
   };
 
+  // Helper components
+  const ControlButton = ({ children, onClick, rotate = 0 }: {
+    children: React.ReactNode;
+    onClick: () => void;
+    rotate?: number;
+  }) => (
+    <motion.button
+      whileHover={{ scale: 1.1, rotate }}
+      whileTap={{ scale: 0.9 }}
+      className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg"
+      onClick={onClick}
+    >
+      {children}
+    </motion.button>
+  );
+
+  const ThemeButton = ({ mode, currentTheme }: {
+    mode: ThemeMode;
+    currentTheme: ThemeMode;
+  }) => (
+    <button 
+      onClick={() => setTheme && setTheme(mode)}
+      className={`px-4 py-2 rounded-lg flex items-center justify-between ${
+        currentTheme === mode 
+          ? 'bg-blue-500 text-white font-bold' 
+          : 'bg-gray-200 text-gray-800'
+      }`}
+    >
+      <span>{mode === 'dark' ? 'Dark Mode' : 'Vibrant'}</span>
+      {currentTheme === mode && <span className="ml-2">✓</span>}
+    </button>
+  );
+
   return (
     <div className="canvas-container relative" ref={containerRef}>
       {/* Control buttons */}
       <div className="absolute top-4 right-4 flex space-x-3 z-30">
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 15 }}
-          whileTap={{ scale: 0.9 }}
-          className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg"
-          onClick={toggleSettings}
-        >
-          ⚙️
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: -15 }}
-          whileTap={{ scale: 0.9 }}
-          className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg"
-          onClick={toggleLearningPath}
-        >
-          📚
-        </motion.button>
+        <ControlButton onClick={toggleSettings} rotate={15}>⚙️</ControlButton>
+        <ControlButton onClick={toggleLearningPath} rotate={-15}>📚</ControlButton>
       </div>
 
       {/* Settings Panel */}
-      {showSettings && (
-        <div 
-          className="settings-panel"
-          style={{
-            position: 'absolute',
-            top: '50px',
-            right: '10px',
-            zIndex: 100,
-            background: theme === 'dark' ? 'var(--dark-node-1)' : 'white',
-            color: theme === 'dark' ? 'white' : 'inherit',
-            borderRadius: '8px',
-            padding: '16px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            width: '250px'
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Customize Nodes</h3>
-          
-          {/* Shape Selection */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Shape:</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button 
-                onClick={() => setSelectedShape('circle')}
-                style={{
-                  padding: '10px',
-                  background: selectedShape === 'circle' ? 'var(--dark-node-3)' : 'var(--dark-node-1)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontWeight: selectedShape === 'circle' ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Circle</span>
-                {selectedShape === 'circle' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
-              <button 
-                onClick={() => setSelectedShape('rectangle')}
-                style={{
-                  padding: '10px',
-                  background: selectedShape === 'rectangle' ? 'var(--dark-node-3)' : 'var(--dark-node-1)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontWeight: selectedShape === 'rectangle' ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Rectangle</span>
-                {selectedShape === 'rectangle' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
-            </div>
-          </div>
-          
-          {/* Theme Selection */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Theme:</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button 
-                onClick={() => setTheme && setTheme('dark')}
-                style={{
-                  padding: '10px',
-                  background: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--dark-node-1)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontWeight: theme === 'dark' ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Dark Mode</span>
-                {theme === 'dark' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
-              <button 
-                onClick={() => setTheme && setTheme('vibrant')}
-                style={{
-                  padding: '10px',
-                  background: theme === 'vibrant' ? 'var(--dark-node-3)' : 'var(--dark-node-1)',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontWeight: theme === 'vibrant' ? 'bold' : 'normal',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>Vibrant</span>
-                {theme === 'vibrant' && <span style={{ fontSize: '18px' }}>✓</span>}
-              </button>
-            </div>
-          </div>
-          
-          <button
-            onClick={toggleSettings}
-            style={{
-              width: '100%',
-              padding: '8px',
-              background: 'var(--gray-200)',
-              color: 'var(--gray-700)',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              marginTop: '8px'
-            }}
+      <AnimatePresence>
+        {showSettings && (
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.9, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: 20 }}
+            className="settings-panel"
+            style={{ backgroundColor: theme === 'dark' ? 'var(--dark-node-1)' : 'white', color: theme === 'dark' ? 'white' : 'inherit' }}
           >
-            Close
-          </button>
-        </div>
-      )}
-      
+            <h3>Customize Nodes</h3>
+            
+            <div className="mb-4">
+              <label>Shape:</label>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setSelectedShape('circle')}
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedShape === 'circle' 
+                      ? 'bg-blue-500 text-white font-bold' 
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
+                >
+                  Circle {selectedShape === 'circle' && '✓'}
+                </button>
+                <button 
+                  onClick={() => setSelectedShape('rectangle')}
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedShape === 'rectangle' 
+                      ? 'bg-blue-500 text-white font-bold' 
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
+                >
+                  Rectangle {selectedShape === 'rectangle' && '✓'}
+                </button>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label>Theme:</label>
+              <div className="flex gap-2">
+                <ThemeButton mode="dark" currentTheme={theme} />
+                <ThemeButton mode="vibrant" currentTheme={theme} />
+              </div>
+            </div>
+            
+            <button 
+              onClick={toggleSettings}
+              className="close-button"
+            >
+              Close
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Learning Path Panel */}
       <AnimatePresence>
         {showLearningPath && (
@@ -832,28 +672,14 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
             initial={{ opacity: 0, scale: 0.9, x: -20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, x: -20 }}
-            transition={{ type: "spring", damping: 20, stiffness: 300 }}
             className="learning-path-panel"
-            style={{
-              position: 'absolute',
-              top: '50px',
-              left: '10px',
-              zIndex: 100,
-              background: theme === 'dark' ? 'var(--dark-node-1)' : 'white',
-              color: theme === 'dark' ? 'white' : 'inherit',
-              borderRadius: '8px',
-              padding: '16px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              width: '350px',
-              maxHeight: '80vh',
-              overflowY: 'auto'
-            }}
+            style={{ backgroundColor: theme === 'dark' ? 'var(--dark-node-1)' : 'white', color: theme === 'dark' ? 'white' : 'inherit' }}
           >
-            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Learning Path: {mindMap.text}</h3>
+            <h3>Learning Path: {mindMap.text}</h3>
             
             {isLoadingLearningPath ? (
-              <div className="text-center py-4">
-                <div className="animate-spin mb-2 text-2xl">⟳</div>
+              <div className="loading-indicator">
+                <div className="animate-spin">⟳</div>
                 <p>Generating learning path...</p>
               </div>
             ) : learningPath ? (
@@ -861,35 +687,27 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
                 {learningPath.map((step, index) => (
                   <div 
                     key={index}
+                    className="path-step"
                     style={{
-                      marginBottom: '16px',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      background: theme === 'dark' ? 'var(--dark-node-2)' : 
-                                theme === 'vibrant' ? 'var(--vibrant-background)' : 
-                                'var(--gray-50)',
-                      borderLeft: `4px solid ${theme === 'dark' ? 'var(--dark-node-3)' : 
-                                              theme === 'vibrant' ? 'var(--vibrant-node-2)' : 
-                                              'var(--pastel-blue)'}`
+                      backgroundColor: theme === 'dark' ? 'var(--dark-node-2)' : 'var(--gray-50)',
+                      borderLeftColor: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--vibrant-node-2)'
                     }}
                   >
-                    <h4 style={{ margin: '0 0 8px 0' }}>{index + 1}. {step.title}</h4>
-                    <p style={{ margin: '0 0 8px 0', fontSize: '14px' }}>{step.description}</p>
+                    <h4>{index + 1}. {step.title}</h4>
+                    <p>{step.description}</p>
                     
                     {step.timeEstimate && (
-                      <div style={{ 
-                        fontSize: '12px', 
-                        color: theme === 'dark' ? '#FFFFFF' : 'var(--gray-600)', 
-                        marginBottom: '8px' 
-                      }}>
+                      <div className="time-estimate"
+                        style={{ backgroundColor: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--gray-200)' }}
+                      >
                         ⏱️ Estimated time: {step.timeEstimate}
                       </div>
                     )}
                     
-                    {step.resources && step.resources.length > 0 && (
+                    {step.resources?.length > 0 && (
                       <div>
-                        <strong style={{ fontSize: '13px' }}>Recommended Resources:</strong>
-                        <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', fontSize: '13px' }}>
+                        <strong>Recommended Resources:</strong>
+                        <ul>
                           {step.resources.map((resource, i) => (
                             <li key={i}>{resource}</li>
                           ))}
@@ -897,10 +715,10 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
                       </div>
                     )}
                     
-                    {step.prerequisites && step.prerequisites.length > 0 && (
+                    {step.prerequisites?.length > 0 && (
                       <div>
-                        <strong style={{ fontSize: '13px' }}>Prerequisites:</strong>
-                        <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', fontSize: '13px' }}>
+                        <strong>Prerequisites:</strong>
+                        <ul>
                           {step.prerequisites.map((prerequisite, i) => (
                             <li key={i}>{prerequisite}</li>
                           ))}
@@ -911,11 +729,11 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4">
+              <div className="no-path">
                 <p>No learning path available.</p>
                 <button 
-                  className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                   onClick={handleGenerateLearningPath}
+                  className="generate-path-button"
                 >
                   Generate Learning Path
                 </button>
@@ -924,16 +742,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
             
             <button
               onClick={toggleLearningPath}
-              style={{
-                width: '100%',
-                padding: '8px',
-                background: 'var(--gray-200)',
-                color: 'var(--gray-700)',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '8px'
-              }}
+              className="close-button"
             >
               Close
             </button>
@@ -941,6 +750,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
         )}
       </AnimatePresence>
       
+      {/* Konva Stage */}
       <Stage
         ref={stageRef}
         width={window.innerWidth}
@@ -962,11 +772,8 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
       {/* Context Menu */}
       {contextMenu.visible && (
         <div
-          className="context-menu absolute z-10"
-          style={{
-            top: contextMenu.y,
-            left: contextMenu.x,
-          }}
+          className="context-menu"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <div className="context-menu-item" onClick={handleExpand}>
             Expand
@@ -989,35 +796,38 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-10 p-4 rounded-lg shadow-lg"
-            style={{
-              backgroundColor: theme === 'dark' ? '#333333' : 'white',
-              color: theme === 'dark' ? 'white' : 'black',
+            className="node-modal"
+            style={{ 
+              backgroundColor: theme === 'dark' ? 'var(--dark-node-1)' : 'white', 
+              color: theme === 'dark' ? 'white' : 'inherit',
               top: modal.y,
               left: modal.x
             }}
           >
-            <div className="mb-4">
+            <div className="modal-content">
               <button
                 onClick={handleGenerateAINodes}
-                className="w-full bg-pastel-purple text-white px-4 py-2 rounded-lg mb-2"
+                className="ai-generate-button"
               >
                 Generate AI Nodes
               </button>
-              <div className="text-center text-gray-500 my-2">or</div>
-              <div className="flex">
+              <div className="divider">or</div>
+              <div className="input-group">
                 <input
                   type="text"
                   value={newNodeText}
                   onChange={(e) => setNewNodeText(e.target.value)}
                   placeholder="Enter node text"
-                  className="flex-1 p-2 border-0 rounded-l-lg outline-none"
-                  style={{ border: '1px solid var(--gray-300)' }}
+                  className="text-input"
+                  style={{ 
+                    backgroundColor: theme === 'dark' ? 'var(--dark-node-2)' : 'white',
+                    color: theme === 'dark' ? 'white' : 'inherit',
+                    borderColor: theme === 'dark' ? 'var(--dark-node-3)' : 'var(--gray-300)'
+                  }}
                 />
                 <button
                   onClick={handleAddManualNode}
-                  className="bg-pastel-green text-white px-4 py-2 rounded-r-lg"
+                  className="add-button"
                   disabled={!newNodeText.trim()}
                 >
                   Add
@@ -1026,7 +836,7 @@ const Canvas: React.FC<CanvasProps> = ({ mindMap, setMindMap, theme = 'dark', se
             </div>
             <button
               onClick={closeModal}
-              className="w-full bg-gray-200 text-gray-700 px-4 py-1 rounded-lg"
+              className="cancel-button"
             >
               Cancel
             </button>
