@@ -1,18 +1,19 @@
-/* Custom styles that can't be easily achieved with Tailwind */
+/* Custom styles for the App component layout */
 
 /* For the canvas container */
 .canvas-container {
   width: 100%;
   height: 100%;
   position: relative;
+  /* The background gradient is applied to the body */
 }
 
-/* Dark mode background */
-body.dark-mode {
+/* Dark mode background - This is now handled by the body background gradient */
+/* body.dark-mode {
   background-color: #222222;
-}
+} */
 
-/* For modal animations */
+/* For modal animations - Keeping existing */
 .modal-enter {
   opacity: 0;
   transform: translateY(-10px);
@@ -32,5 +33,208 @@ body.dark-mode {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+
+/* Styles for the main App layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  /* Background gradient is on the body */
+}
+
+/* Styles for the top bar (header) */
+.app-header {
+  padding: 1.5rem; /* p-6 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  background-color: var(--topbar-background); /* Themed top bar background */
+  color: var(--topbar-text); /* Themed top bar text */
+  position: relative; /* Needed for z-index context */
+  z-index: 20; /* Ensure top bar is above canvas */
+}
+
+.app-header h1 {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    margin-bottom: 1.25rem; /* mb-5 */
+    font-family: 'Poppins', sans-serif;
+    color: var(--topbar-text); /* Ensure heading color is correct */
+}
+
+/* Styles for the centered search box area */
+.search-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* w-full */
+    max-width: 48rem; /* max-w-3xl */
+    margin-bottom: 1.25rem; /* mb-5 */
+}
+
+.search-input {
+    flex: 1; /* flex-1 */
+    padding: 1rem; /* p-4 */
+    border-top-left-radius: 0.5rem; /* rounded-l-lg */
+    border-bottom-left-radius: 0.5rem; /* rounded-l-lg */
+    border: 0; /* border-0 */
+    outline: none; /* outline-none */
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem; /* text-xl */
+    background-color: var(--gray-800); /* Darker background for input */
+    color: var(--text-color); /* Themed text color */
+}
+
+.search-input::placeholder {
+    color: var(--gray-500); /* Themed placeholder color */
+}
+
+.generate-button {
+    padding: 1rem 2.5rem; /* px-10 py-4 */
+    border-top-right-radius: 0.5rem; /* rounded-r-lg */
+    border-bottom-right-radius: 0.5rem; /* rounded-r-lg */
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    width: 100%; /* w-full */
+    max-width: 10rem; /* Adjusted max-width for button */
+    background-color: var(--accent-color-1); /* Accent blue button */
+    color: var(--white); /* White text */
+    box-shadow: 0 8px 12px rgba(0, 123, 255, 0.3); /* Themed shadow */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.generate-button:hover {
+    background-color: #0056b3; /* Slightly darker blue on hover */
+    box-shadow: 0 10px 15px rgba(0, 123, 255, 0.4);
+}
+
+.generate-button:disabled {
+    background-color: var(--gray-600);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.generate-button .animate-spin {
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+
+/* Styles for action buttons area */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem; /* space-x-4 */
+}
+
+.export-button {
+    padding: 0.75rem 1.5rem; /* px-6 py-3 */
+    border-radius: 0.5rem; /* rounded-lg */
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600; /* font-semibold */
+    background-color: var(--node-bg); /* Node background color */
+    color: var(--node-text); /* Node text color */
+    transition: background-color 0.2s ease;
+}
+
+.export-button:hover {
+    background-color: rgba(26, 46, 71, 0.8); /* Slightly lighter on hover */
+}
+
+.export-button span {
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+
+/* Styles for the main canvas area */
+.canvas-area {
+    flex: 1; /* flex-1 */
+    overflow: hidden; /* overflow-hidden */
+    /* Background gradient is on the body */
+    position: relative; /* Needed for absolute positioning of panels */
+}
+
+/* Styles for the welcome message */
+.welcome-message {
+    height: 100%; /* h-full */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-card {
+    text-align: center; /* text-center */
+    max-width: 28rem; /* max-w-md */
+    padding: 1.5rem; /* p-6 */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    background-color: var(--node-bg); /* Themed background */
+    color: var(--node-text); /* Themed text */
+}
+
+.welcome-card h2 {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 1rem; /* mb-4 */
+    font-family: 'Poppins', sans-serif;
+}
+
+.welcome-card p {
+    margin-bottom: 1.5rem; /* mb-6 */
+    font-family: 'Poppins', sans-serif;
+    color: var(--gray-300); /* Lighter text */
+}
+
+.welcome-card .pulsing-circle {
+    display: flex;
+    justify-content: center;
+}
+
+.welcome-card .pulsing-circle > div {
+    width: 4rem; /* w-16 */
+    height: 4rem; /* h-16 */
+    border-radius: 9999px; /* rounded-full */
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
+    background-color: var(--accent-color-1); /* Accent color for pulse */
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+
+/* Control Buttons (Settings and Learning Path toggles) */
+.control-button {
+  width: 4rem; /* w-16 */
+  height: 4rem; /* h-16 */
+  border-radius: 9999px; /* rounded-full */
+  background-color: var(--node-bg); /* Themed background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--node-text); /* Themed text */
+  box-shadow: 0 4px 8px var(--node-shadow); /* Themed shadow */
+  font-size: 1.5rem; /* text-2xl */
+  transition: all 0.3s ease;
+}
+
+.control-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px var(--node-shadow);
 }
 

@@ -25,16 +25,19 @@ export const generateSubtopics = async (topic: string): Promise<string[]> => {
   try {
     // First try to generate a structured mind map
     const mindMapStructure = await generateMindMapStructure(topic);
-    
-    // If we have a structured mind map, extract the top-level subtopics
-    if (mindMapStructure && mindMapStructure.children && mindMapStructure.children.length > 0) {
-      return mindMapStructure.children.map(child => child.text);
+
+    // If we have a structured mind map and it has children, extract the top-level subtopics
+    // Added check for mindMapStructure existence and children being an array
+    if (mindMapStructure && Array.isArray(mindMapStructure.children) && mindMapStructure.children.length > 0) {
+      // Filter out any potential null/undefined children before mapping
+      return mindMapStructure.children.filter(child => !!child).map(child => child.text);
     }
-    
-    // If structured approach fails, fall back to simple list
+
+    // If structured approach fails or returns empty children, fall back to simple list
     return await generateSimpleSubtopics(topic);
   } catch (error) {
     console.error('Error generating subtopics:', error);
+    // Fallback to generic subtopics if both structured and simple generation fail
     return getGenericSubtopics(topic);
   }
 };
@@ -47,21 +50,27 @@ export const generateSimpleSubtopics = async (topic: string): Promise<string[]> 
   const cacheKey = `mindmap_simple_${topic}`;
   const cachedData = localStorage.getItem(cacheKey);
   if (cachedData) {
-    return JSON.parse(cachedData);
+    try {
+      return JSON.parse(cachedData);
+    } catch (e) {
+      console.error("Failed to parse cached simple subtopics", e);
+      localStorage.removeItem(cacheKey); // Clear invalid cache
+    }
   }
-  
+
   try {
     console.log(`Generating simple subtopics for: ${topic} using Gemini API`);
-    
+
     // Call the Gemini API
     const response = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0',
+      '[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0)',
       {
         contents: [
           {
             parts: [
               {
-                text: `List 5-8 subtopics for ${topic}. Return only the subtopics as a simple comma-separated list with no numbering or additional text.`
+                // Improved prompt for simple subtopics
+                text: `List 6-10 distinct and important subtopics for "${topic}". Provide only the subtopics as a simple comma-separated list. Ensure there is no numbering, introductory/explanatory text, or any other formatting. Just the comma-separated list of subtopic names.`
               }
             ]
           }
@@ -73,21 +82,30 @@ export const generateSimpleSubtopics = async (topic: string): Promise<string[]> 
         }
       }
     );
-    
+
     // Parse the response
-    const content = response.data.candidates[0].content.parts[0].text;
+    const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!content) {
+        console.error("API response content is empty for simple subtopics.");
+        return getGenericSubtopics(topic);
+    }
+
     const subtopics = content
       .split(',')
       .map((topic: string) => topic.trim())
-      .filter((topic: string) => topic.length > 0);
-    
-    // Cache the results
-    localStorage.setItem(cacheKey, JSON.stringify(subtopics));
-    
-    return subtopics;
+      .filter((topic: string) => topic.length > 0); // Filter out empty strings from split
+
+    // Cache the results only if we got valid subtopics
+    if (subtopics.length > 0) {
+        localStorage.setItem(cacheKey, JSON.stringify(subtopics));
+    }
+
+    return subtopics.length > 0 ? subtopics : getGenericSubtopics(topic); // Fallback if parsing results in empty list
+
   } catch (error) {
     console.error('Error generating simple subtopics with Gemini API:', error);
-    return getGenericSubtopics(topic);
+    return getGenericSubtopics(topic); // Fallback on API error
   }
 };
 
@@ -100,41 +118,59 @@ export const generateMindMapStructure = async (topic: string): Promise<MindMapNo
   const cacheKey = `mindmap_structure_${topic}`;
   const cachedData = localStorage.getItem(cacheKey);
   if (cachedData) {
-    return JSON.parse(cachedData);
+     try {
+      const parsedData = JSON.parse(cachedData);
+      // Basic validation for cached data structure
+      if (parsedData && typeof parsedData === 'object' && typeof parsedData.text === 'string' && Array.isArray(parsedData.children)) {
+         return parsedData;
+      } else {
+         console.error("Cached mind map structure is invalid.");
+         localStorage.removeItem(cacheKey); // Clear invalid cache
+      }
+    } catch (e) {
+      console.error("Failed to parse cached mind map structure", e);
+      localStorage.removeItem(cacheKey); // Clear invalid cache
+    }
   }
-  
+
   try {
     console.log(`Generating mind map structure for: ${topic} using Gemini API`);
-    
-    // Call the Gemini API with a prompt requesting JSON structure
+
+    // Call the Gemini API with an improved prompt requesting JSON structure
     const response = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0',
+      '[https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0](https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCkc5Ay7BGk0QgFSz1LGsqS8m8MT8GGem0)',
       {
         contents: [
           {
             parts: [
               {
-                text: `I want a mind map about "${topic}". Create a comprehensive mind map structure with the main topic and multiple levels of subtopics.
+                // Improved prompt for structured mind map
+                text: `Create a comprehensive and hierarchical mind map structure about "${topic}".
+                Organize the information into a main topic and multiple levels of subtopics.
+                Aim for a balanced tree structure with varying depth, rather than a very wide, shallow structure.
+                Group related concepts logically under parent nodes.
+                Include at least 6-10 main subtopics, and for each main subtopic, include 2-5 relevant sub-subtopics, and potentially further levels of detail where appropriate.
 
-Return ONLY a valid JSON object with the following structure:
-{
-  "text": "${topic}",
-  "children": [
-    {
-      "text": "Subtopic 1",
-      "children": [
-        {
-          "text": "Sub-subtopic 1.1",
-          "children": []
-        },
-        ...
-      ]
-    },
-    ...
-  ]
-}
+                Return ONLY a valid JSON object representing this structure.
+                The JSON object should have the following format:
+                {
+                  "text": "Main Topic Name",
+                  "children": [
+                    {
+                      "text": "Subtopic 1 Name",
+                      "children": [
+                        {
+                          "text": "Sub-subtopic 1.1 Name",
+                          "children": [] // Children array should always be present, even if empty
+                        },
+                        // ... more sub-subtopics
+                      ]
+                    },
+                    // ... more main subtopics
+                  ]
+                }
 
-Include at least 5-8 main subtopics, and 2-4 sub-subtopics for each main subtopic. Do not include any explanatory text, only the JSON structure.`
+                Ensure the response is ONLY the JSON object, with no surrounding text, explanations, or code block markers (like \`\`\`json).` // Explicitly ask for no code block markers
               }
             ]
           }
@@ -146,31 +182,75 @@ Include at least 5-8 main subtopics, and 2-4 sub-subtopics for each main subtopi
         }
       }
     );
-    
+
     // Parse the response
-    const content = response.data.candidates[0].content.parts[0].text;
-    
-    // Extract the JSON object from the response (handling potential extra text)
-    let jsonStr = content;
-    
-    // If the response contains a code block, extract just the JSON part
-    if (content.includes('```json')) {
-      jsonStr = content.split('```json')[1].split('```')[0].trim();
-    } else if (content.includes('```')) {
-      jsonStr = content.split('```')[1].split('```')[0].trim();
+    const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+     if (!content) {
+        console.error("API response content is empty for structured mind map.");
+        // Fallback to simple structure if API returns empty content
+        return {
+          text: topic,
+          children: getGenericSubtopics(topic).map(subtopic => ({
+            text: subtopic,
+            children: []
+          }))
+        };
     }
-    
-    // Parse the JSON
-    const mindMapStructure = JSON.parse(jsonStr) as MindMapNode;
-    
+
+
+    // Attempt to parse the JSON directly, as we asked the AI not to include markers
+    let mindMapStructure: MindMapNode;
+    try {
+        mindMapStructure = JSON.parse(content) as MindMapNode;
+    } catch (parseError) {
+        console.error("Failed to parse JSON directly, attempting to extract from code block:", parseError);
+        // Fallback: try to extract JSON from a code block if the AI ignored the instruction
+        let jsonStr = content;
+         if (content.includes('```json')) {
+            jsonStr = content.split('```json')[1].split('```')[0].trim();
+        } else if (content.includes('```')) {
+            jsonStr = content.split('```')[1].split('```')[0].trim();
+        }
+
+        try {
+             mindMapStructure = JSON.parse(jsonStr) as MindMapNode;
+        } catch (fallbackParseError) {
+            console.error("Failed to parse JSON even from code block:", fallbackParseError);
+             // Final fallback: return a simple structure
+            return {
+              text: topic,
+              children: getGenericSubtopics(topic).map(subtopic => ({
+                text: subtopic,
+                children: []
+              }))
+            };
+        }
+    }
+
+    // Validate the parsed structure
+    if (typeof mindMapStructure !== 'object' || typeof mindMapStructure.text !== 'string' || !Array.isArray(mindMapStructure.children)) {
+        console.error("Parsed mind map structure is invalid:", mindMapStructure);
+        // Fallback if the parsed structure doesn't match the expected format
+         return {
+            text: topic,
+            children: getGenericSubtopics(topic).map(subtopic => ({
+              text: subtopic,
+              children: []
+            }))
+          };
+    }
+
+
     // Cache the results
     localStorage.setItem(cacheKey, JSON.stringify(mindMapStructure));
-    
+
     return mindMapStructure;
+
   } catch (error) {
     console.error('Error generating mind map structure with Gemini API:', error);
-    
-    // Return a simple structure with the topic
+
+    // Return a simple structure with the topic as a fallback on API error
     return {
       text: topic,
       children: getGenericSubtopics(topic).map(subtopic => ({
@@ -190,23 +270,40 @@ export const generateLearningPath = async (topic: string): Promise<LearningPathN
   const cacheKey = `learning_path_${topic}`;
   const cachedData = localStorage.getItem(cacheKey);
   if (cachedData) {
-    return JSON.parse(cachedData);
+    try {
+      const parsedData = JSON.parse(cachedData);
+       // Basic validation for cached learning path data
+      if (Array.isArray(parsedData)) {
+        // Optional: add more detailed checks for array elements if needed
+        return parsedData;
+      } else {
+         console.error("Cached learning path data is invalid.");
+         localStorage.removeItem(cacheKey); // Clear invalid cache
+      }
+    } catch (e) {
+      console.error("Failed to parse cached learning path", e);
+      localStorage.removeItem(cacheKey); // Clear invalid cache
+    }
   }
-  
+
   try {
-    // Simulate API call delay
+    // Simulate API call delay (keeping this for now as per original code)
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Generate a detailed learning path
+
+    // *** This part uses the hardcoded simulateLearningPathResponse ***
+    // *** If you want this to be AI-generated, you would need a new API call here ***
     const learningPath = await simulateLearningPathResponse(topic);
-    
-    // Cache the results
-    localStorage.setItem(cacheKey, JSON.stringify(learningPath));
-    
+
+    // Cache the results only if we got a valid array back
+    if (Array.isArray(learningPath) && learningPath.length > 0) {
+       localStorage.setItem(cacheKey, JSON.stringify(learningPath));
+    }
+
+
     return learningPath;
   } catch (error) {
     console.error('Error generating learning path:', error);
-    
+
     // Return a simple fallback learning path
     return [
       {
@@ -229,12 +326,12 @@ export const generateLearningPath = async (topic: string): Promise<LearningPathN
 };
 
 /**
- * Get generic subtopics for a topic when API fails
+ * Get generic subtopics for a topic when API fails (Fallback Data)
  */
 function getGenericSubtopics(topic: string): string[] {
   // Generate more intelligent responses based on common topics
   const lowerTopic = topic.toLowerCase();
-  
+
   if (lowerTopic.includes('python')) {
     return [
       'Basic Syntax & Data Types',
@@ -291,7 +388,7 @@ function getGenericSubtopics(topic: string): string[] {
       'Ethics in Data Science'
     ];
   }
-  
+
   // For other topics, return generic subtopics
   return [
     'Overview',
@@ -306,11 +403,13 @@ function getGenericSubtopics(topic: string): string[] {
 }
 
 /**
- * Simulate a detailed learning path response
+ * Simulate a detailed learning path response (Fallback Data)
+ * *** This function contains hardcoded data used as a fallback ***
+ * *** If you want AI-generated learning paths, you would need a new API call here ***
  */
 async function simulateLearningPathResponse(topic: string): Promise<LearningPathNode[]> {
   const lowerTopic = topic.toLowerCase();
-  
+
   if (lowerTopic.includes('python')) {
     return [
       {
@@ -378,14 +477,14 @@ async function simulateLearningPathResponse(topic: string): Promise<LearningPath
       }
     ];
   }
-  
+
   // Generic learning path for other topics with more detailed information
   return [
     {
       title: 'Fundamentals',
       description: `Master the core concepts and principles of ${topic}. Start with basic terminology, key theories, and foundational knowledge. Focus on building a strong conceptual understanding before moving to more complex topics.`,
       resources: [
-        'Beginner-friendly textbooks and reference guides', 
+        'Beginner-friendly textbooks and reference guides',
         'Introductory online courses on platforms like Coursera, edX, or Udemy',
         'YouTube tutorial series covering basics',
         'Interactive learning platforms with hands-on exercises'
@@ -473,5 +572,3 @@ async function simulateLearningPathResponse(topic: string): Promise<LearningPath
     }
   ];
 }
-
-

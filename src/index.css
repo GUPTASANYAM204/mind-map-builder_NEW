@@ -1,72 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap'); */
+/* Removed Poppins font import as it might be causing rendering issues with Konva */
 
 :root {
-  /* Theme colors - will be used based on selected theme */
-  --background-color: var(--modern-background);
-  --text-color: var(--modern-text);
-  --topbar-background: var(--modern-topbar);
-  --node-color-1: var(--modern-node-1);
-  --node-color-2: var(--modern-node-2);
-  --node-color-3: var(--modern-node-3);
-  
-  /* Modern dark theme (default) */
-  /* --modern-background: #0F1419;
-  --modern-text: #FFFFFF;
-  --modern-topbar: #161B22;
-  --modern-node-1: #4AE3B5; /* Vibrant green */
-  /* --modern-node-2: #2D3748; /* Dark slate */
-  /* --modern-node-3: #3A506B; Navy blue */
-  /* --modern-accent: #4AE3B5; Vibrant green accent */
-  /* --modern-card-bg: #1A202C; Slightly lighter than background */
-  /* --modern-hover: #2D3748; Hover state */
-  /* --modern-gradient: linear-gradient(135deg, #4AE3B5, #2C8D99); */ 
-   
-  /* Pastel theme
-  --pastel-background: #F7FAFC;
-  --pastel-text: #2D3748;
-  --pastel-topbar: #AEC6CF;
-  --pastel-node-1: #AEC6CF;
-  --pastel-node-2: #B5EAD7;
-  --pastel-node-3: #E0C3FC; */
-  
-  /* Dark theme */
-  --dark-background: #2D3748;
-  --dark-text: #FFFFFF;
-  --dark-topbar: #02050A;
-  --dark-node-1: #55E6A5;
-  --dark-node-2: #55E6A5;
-  --dark-node-3: #55E6A5;
-  
-  /* Vibrant theme */
-  --vibrant-background: #EBF8FF;
-  --vibrant-text: #2D3748;
-  --vibrant-topbar-gradient: linear-gradient(to right, #4299E1, #48BB78);
-  --vibrant-node-1: #F56565;
-  --vibrant-node-2: #48BB78;
-  --vibrant-node-3: #9F7AEA;
-  
-  /* Original pastel colors (keeping for backward compatibility) */
-  --pastel-blue: #AEC6CF;
-  --pastel-green: #B5EAD7;
-  --pastel-purple: #E0C3FC;
-  
-  /* Darker variants */
-  --dark-blue: #5B8BA0;
-  --dark-green: #6BA88A;
-  --dark-purple: #A76FC9;
-  
-  /* Vibrant variants */
-  --vibrant-blue: #4A9DFF;
-  --vibrant-green: #4AD991;
-  --vibrant-purple: #B45AFF;
-  
-  /* Gradient definitions */
-  --gradient-blue: linear-gradient(135deg, var(--pastel-blue), var(--dark-blue));
-  --gradient-green: linear-gradient(135deg, var(--pastel-green), var(--dark-green));
-  --gradient-purple: linear-gradient(135deg, var(--pastel-purple), var(--dark-purple));
-  --gradient-blue-green: linear-gradient(135deg, var(--vibrant-blue), var(--vibrant-green));
-  --gradient-purple-blue: linear-gradient(135deg, var(--vibrant-purple), var(--vibrant-blue));
-  
+  /* Modern Black and Blue Gradient Theme */
+  --background-gradient: linear-gradient(135deg, #0A1128, #001F3F); /* Deep blue to dark navy */
+  --text-color: #E0E0E0; /* Light gray for readability */
+  --topbar-background: rgba(10, 17, 40, 0.8); /* Semi-transparent dark blue */
+  --topbar-text: #FFFFFF; /* White text for top bar */
+
+  /* Node Colors (using shades of the theme) */
+  --node-bg: #1A2E47; /* Dark blue-gray for nodes */
+  --node-text: #FFFFFF; /* White text on nodes */
+  --node-border: #34568B; /* Slightly lighter blue for borders */
+  --node-shadow: rgba(0, 0, 0, 0.4); /* Darker shadow */
+
+  /* Accent Colors (for buttons, highlights) */
+  --accent-color-1: #007BFF; /* Vibrant blue */
+  --accent-color-2: #4CAF50; /* Green for success/add */
+  --accent-color-3: #DC3545; /* Red for danger/delete */
+
   /* Grayscale */
   --white: #FFFFFF;
   --gray-50: #F9FAFB;
@@ -79,10 +31,10 @@
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #111827;
-  
-  /* Node shapes */
+
+  /* Node shapes - keeping variables but will primarily use rounded rectangles */
   --border-radius-circle: 50%;
-  --border-radius-rounded: 8px;
+  --border-radius-rounded: 10px; /* Slightly larger border radius for sleek look */
   --border-radius-pill: 24px;
 }
 
@@ -96,208 +48,96 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Poppins', sans-serif;
+  /* Using a standard sans-serif fallback now */
+  font-family: 'Arial', sans-serif;
+  /* Apply the gradient background */
+  background: var(--background-gradient);
+  color: var(--text-color);
 }
 
-/* Layout */
-.flex {
-  display: flex;
-}
+/* --- Layout Utilities (Replacing Tailwind-like classes) --- */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.h-screen { height: 100vh; }
+.w-screen { width: 100vw; }
+.h-full { height: 100%; }
+.w-full { width: 100%; } /* Added for full width elements */
+.max-w-md { max-width: 28rem; }
+.max-w-3xl { max-width: 48rem; } /* Added for wider elements */
+.mx-auto { margin-left: auto; margin-right: auto; } /* Added for centering blocks */
 
-.flex-col {
-  flex-direction: column;
-}
+/* --- Spacing Utilities (Replacing Tailwind-like classes) --- */
+.p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; } /* Added */
+.px-10 { padding-left: 2.5rem; padding-right: 2.5rem; } /* Added */
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; } /* Added */
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.mt-4 { margin-top: 1rem; } /* Added */
+.mb-4 { margin-bottom: 1rem; }
+.mb-5 { margin-bottom: 1.25rem; } /* Added */
+.mb-6 { margin-bottom: 1.5rem; }
+.mr-2 { margin-right: 0.5rem; }
+.mr-4 { margin-right: 1rem; }
+.ml-4 { margin-left: 1rem; }
+.space-x-4 > :not([hidden]) ~ :not([hidden]) { margin-right: calc(1rem * var(--tw-space-x-reverse)); margin-left: calc(1rem * (1 - var(--tw-space-x-reverse))); } /* Basic space-x */
+.gap-2 { gap: 0.5rem; } /* Added for flex gap */
 
-.flex-1 {
-  flex: 1;
-}
 
-.items-center {
-  align-items: center;
-}
+/* --- Typography Utilities --- */
+.text-center { text-align: center; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; } /* Added */
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; } /* Added */
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+/* Removed specific font-poppins utility class reference if no longer using Poppins */
+.text-white { color: var(--white); } /* Explicit white text */
+.text-gray-300 { color: var(--gray-300); } /* Explicit gray text */
+.text-gray-600 { color: var(--gray-600); } /* Explicit gray text */
+.text-gray-700 { color: var(--gray-700); /* Explicit gray text */
 
-.justify-center {
-  justify-content: center;
-}
 
-.justify-between {
-  justify-content: space-between;
-}
+/* --- Component Styling --- */
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-l-lg { border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
+.rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+.rounded-full { border-radius: 9999px; } /* Added */
 
-.h-screen {
-  height: 100vh;
-}
+.shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
 
-.w-screen {
-  width: 100vw;
-}
+.border-0 { border: 0; }
+.outline-none { outline: none; }
+.overflow-hidden { overflow: hidden; }
+.relative { position: relative; } /* Added */
+.absolute { position: absolute; } /* Added */
+.top-4 { top: 1rem; } /* Added */
+.left-4 { left: 1rem; } /* Added */
+.right-4 { right: 1rem; } /* Added */
+.z-30 { z-index: 30; } /* Added */
 
-.h-full {
-  height: 100%;
-}
 
-.max-w-md {
-  max-width: 28rem;
-}
-
-.p-2 {
-  padding: 0.5rem;
-}
-
-.p-4 {
-  padding: 1rem;
-}
-
-.p-6 {
-  padding: 1.5rem;
-}
-
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
-.mr-2 {
-  margin-right: 0.5rem;
-}
-
-.mr-4 {
-  margin-right: 1rem;
-}
-
-.ml-4 {
-  margin-left: 1rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.my-2 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Typography */
-.text-center {
-  text-align: center;
-}
-
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
-}
-
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-poppins {
-  font-family: 'Poppins', sans-serif;
-}
-
-/* Colors */
-.bg-pastel-blue {
-  background-color: var(--pastel-blue);
-}
-
-.bg-pastel-green {
-  background-color: var(--pastel-green);
-}
-
-.bg-pastel-purple {
-  background-color: var(--pastel-purple);
-}
-
-.bg-white {
-  background-color: var(--white);
-}
-
-.bg-gray-50 {
-  background-color: var(--gray-50);
-}
-
-.bg-gray-200 {
-  background-color: var(--gray-200);
-}
-
-.text-white {
-  color: var(--white);
-}
-
-.text-gray-500 {
-  color: var(--gray-500);
-}
-
-.text-gray-700 {
-  color: var(--gray-700);
-}
-
-/* Components */
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.rounded-l-lg {
-  border-top-left-radius: 0.5rem;
-  border-bottom-left-radius: 0.5rem;
-}
-
-.rounded-r-lg {
-  border-top-right-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-}
-
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.border-0 {
-  border: 0;
-}
-
-.outline-none {
-  outline: none;
-}
-
-.overflow-hidden {
-  overflow: hidden;
-}
-
-/* Interactive elements */
+/* --- Interactive elements --- */
 button {
   cursor: pointer;
   border: none;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Arial', sans-serif; /* Changed button font as well for consistency */
   transition: all 0.3s ease;
 }
 
 button:hover {
   opacity: 0.9;
-  transform: scale(1.05);
+  /* transform: scale(1.05); Removed for a sleeker hover effect */
 }
 
 button:disabled {
@@ -307,48 +147,54 @@ button:disabled {
 }
 
 input {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Arial', sans-serif; /* Changed input font as well for consistency */
 }
 
 input:focus {
-  outline: 2px solid var(--pastel-purple);
+  outline: 2px solid var(--accent-color-1); /* Use accent color for focus */
 }
 
-/* Node specific styles */
-.node-circle {
+/* Node specific styles - will be handled more in Node.tsx and Canvas.tsx */
+.node-shape {
+  /* Base styles for node shapes */
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.node-circle:hover {
-  transform: scale(1.05);
+.node-shape:hover {
+   transform: scale(1.03); /* Subtle scale on hover */
 }
+
 
 /* Context menu styles */
 .context-menu {
   position: absolute;
-  z-index: 10;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100; /* Increased z-index */
+  background-color: var(--node-bg); /* Use node background color */
+  color: var(--node-text); /* Use node text color */
+  border-radius: var(--border-radius-rounded); /* Rounded corners */
+  box-shadow: 0 4px 12px var(--node-shadow); /* Themed shadow */
   padding: 8px 0;
+  min-width: 150px; /* Minimum width */
 }
 
 .context-menu-item {
-  padding: 8px 16px;
+  padding: 10px 16px; /* Increased padding */
   cursor: pointer;
+  font-size: 0.95rem; /* Slightly smaller font */
+  transition: background-color 0.2s ease;
 }
 
 .context-menu-item:hover {
-  background-color: var(--gray-100);
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle highlight on hover */
 }
 
-/* Canvas container */
-.canvas-container {
+/* Canvas container - already defined in App.css, keeping for clarity */
+/* .canvas-container {
   width: 100%;
   height: 100%;
   position: relative;
-}
+} */
 
 /* Animation classes */
 .animate-spin {
@@ -364,7 +210,7 @@ input:focus {
   }
 }
 
-/* Modal animations */
+/* Modal animations - keeping existing */
 .modal-enter {
   opacity: 0;
   transform: translateY(-10px);
@@ -389,22 +235,25 @@ input:focus {
 /* Settings Panel */
 .settings-panel {
   position: absolute;
-  top: 50px;
-  right: 10px;
+  top: 80px; /* Adjusted position */
+  right: 20px; /* Adjusted position */
   z-index: 100;
-  border-radius: 12px;
+  border-radius: var(--border-radius-rounded);
   padding: 20px;
-  width: 280px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  width: 300px; /* Slightly wider */
+  box-shadow: 0 8px 16px var(--node-shadow);
   max-height: 80vh;
   overflow-y: auto;
+  background-color: var(--node-bg); /* Themed background */
+  color: var(--node-text); /* Themed text */
 }
 
 .settings-panel h3 {
   margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
+  margin-bottom: 20px; /* Increased margin */
+  font-size: 1.3rem; /* Slightly larger font */
   font-weight: 600;
+  color: var(--topbar-text); /* Highlighted heading */
 }
 
 .settings-panel .mb-4 {
@@ -415,7 +264,8 @@ input:focus {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 1rem; /* Adjusted font size */
+  color: var(--gray-300); /* Subtle label color */
 }
 
 .settings-panel .flex.gap-2 {
@@ -425,57 +275,85 @@ input:focus {
 
 .settings-panel button {
   transition: all 0.2s ease;
+  padding: 10px 15px; /* Adjusted padding */
+  border-radius: 8px; /* Rounded buttons */
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle button background */
+  color: var(--node-text);
 }
 
-.settings-panel .w-full {
-  width: 100%;
-  margin-top: 16px;
-  padding: 8px 12px;
-  border-radius: 8px;
+.settings-panel button:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Increased opacity on hover */
 }
+
+.settings-panel button.active { /* Class for active theme/shape button */
+  background-color: var(--accent-color-1); /* Accent color for active state */
+  color: var(--white);
+  font-weight: 600;
+}
+
+
+.settings-panel .close-button {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--gray-700); /* Darker gray */
+  color: var(--white);
+  border-radius: 8px;
+  margin-top: 20px; /* Increased margin */
+}
+.settings-panel .close-button:hover {
+    background-color: var(--gray-600);
+}
+
 
 /* Learning Path Panel */
 .learning-path-panel {
   position: absolute;
-  top: 50px;
-  left: 10px;
+  top: 80px; /* Adjusted position */
+  left: 20px; /* Adjusted position */
   z-index: 100;
-  border-radius: 12px;
+  border-radius: var(--border-radius-rounded);
   padding: 20px;
   width: 350px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px var(--node-shadow);
   max-height: 80vh;
   overflow-y: auto;
+  background-color: var(--node-bg); /* Themed background */
+  color: var(--node-text); /* Themed text */
 }
 
 .learning-path-panel h3 {
   margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.2rem;
+  margin-bottom: 20px; /* Increased margin */
+  font-size: 1.3rem; /* Slightly larger font */
   font-weight: 600;
+   color: var(--topbar-text); /* Highlighted heading */
 }
 
 .path-step {
   margin-bottom: 16px;
   padding: 16px;
   border-radius: 10px;
-  border-left: 4px solid;
+  border-left: 4px solid var(--accent-color-1); /* Accent color border */
   transition: transform 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05); /* Subtle step background */
 }
 
 .path-step:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px); /* More pronounced hover effect */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
 }
 
 .path-step h4 {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
+  color: var(--gray-200); /* Slightly lighter heading */
 }
 
 .path-step p {
   margin: 0 0 12px 0;
   font-size: 0.95rem;
   line-height: 1.5;
+  color: var(--gray-300); /* Lighter paragraph text */
 }
 
 .time-estimate {
@@ -484,23 +362,29 @@ input:focus {
   padding: 4px 8px;
   border-radius: 4px;
   display: inline-block;
+  background-color: rgba(0, 123, 255, 0.2); /* Semi-transparent accent blue */
+  color: var(--accent-color-1); /* Accent color text */
+  font-weight: 500;
 }
 
 .path-step strong {
   font-size: 0.9rem;
   display: block;
   margin-bottom: 4px;
+  color: var(--gray-200); /* Slightly lighter strong text */
 }
 
 .path-step ul {
   margin: 4px 0 8px 0;
   padding-left: 20px;
   font-size: 0.85rem;
+  color: var(--gray-300); /* Lighter list text */
 }
 
 .loading-indicator {
   text-align: center;
   padding: 24px 0;
+  color: var(--accent-color-1); /* Accent color for loading indicator */
 }
 
 .loading-indicator .animate-spin {
@@ -511,44 +395,51 @@ input:focus {
 .no-path {
   text-align: center;
   padding: 16px 0;
+  color: var(--gray-400); /* Subtle text color */
 }
 
 .generate-path-button {
   margin-top: 16px;
   padding: 14px 20px;
-  background-color: var(--vibrant-blue);
+  background-color: var(--accent-color-1); /* Accent blue button */
   color: white;
   border-radius: 10px;
   font-weight: 600;
   font-size: 1.1rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); /* Themed shadow */
   transition: all 0.3s ease;
   width: 100%;
 }
 
 .generate-path-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 8px rgba(0, 123, 255, 0.4);
 }
 
-.close-button {
+.learning-path-panel .close-button {
   width: 100%;
-  padding: 8px 12px;
-  background-color: var(--gray-200);
-  color: var(--gray-700);
+  padding: 10px 12px;
+  background-color: var(--gray-700); /* Darker gray */
+  color: var(--white);
   border-radius: 8px;
-  margin-top: 16px;
+  margin-top: 20px; /* Increased margin */
 }
+.learning-path-panel .close-button:hover {
+    background-color: var(--gray-600);
+}
+
 
 /* Node Modal */
 .node-modal {
   position: absolute;
-  z-index: 10;
+  z-index: 100; /* Increased z-index */
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: var(--border-radius-rounded);
+  box-shadow: 0 8px 20px var(--node-shadow);
   width: 320px;
+  background-color: var(--node-bg); /* Themed background */
+  color: var(--node-text); /* Themed text */
 }
 
 .modal-content {
@@ -557,7 +448,7 @@ input:focus {
 
 .ai-generate-button {
   width: 100%;
-  background-color: var(--vibrant-purple);
+  background-color: var(--accent-color-2); /* Green for AI generation */
   color: white;
   padding: 14px 20px;
   border-radius: 10px;
@@ -565,13 +456,13 @@ input:focus {
   font-weight: 600;
   font-size: 1.1rem;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3); /* Themed shadow */
   transition: all 0.3s ease;
 }
 
 .ai-generate-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 8px rgba(76, 175, 80, 0.4);
 }
 
 .divider {
@@ -579,16 +470,17 @@ input:focus {
   color: var(--gray-500);
   margin: 12px 0;
   position: relative;
+  font-size: 0.9rem; /* Smaller divider text */
 }
 
-.divider::before, 
+.divider::before,
 .divider::after {
   content: '';
   position: absolute;
   top: 50%;
   width: 40%;
   height: 1px;
-  background-color: var(--gray-300);
+  background-color: var(--gray-700); /* Darker line */
 }
 
 .divider::before {
@@ -596,34 +488,4 @@ input:focus {
 }
 
 .divider::after {
-  right: 0;
-}
-
-.input-group {
-  display: flex;
-}
-
-.text-input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--gray-300);
-  border-right: none;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-}
-
-.add-button {
-  background-color: var(--vibrant-green);
-  color: white;
-  padding: 8px 16px;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
-
-.cancel-button {
-  width: 100%;
-  background-color: var(--gray-200);
-  color: var(--gray-700);
-  padding: 8px 12px;
-  border-radius: 8px;
-}
+  right: 0;}}
