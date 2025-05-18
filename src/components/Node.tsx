@@ -3,7 +3,7 @@ import { Group, Text, Rect } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 
 // Import types from the new types.ts file
-import type { NodeData, NodeShape, ThemeMode } from '../types';
+import type { NodeShape, ThemeMode } from '../types';
 
 
 interface NodeProps {
