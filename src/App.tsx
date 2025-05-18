@@ -4,7 +4,7 @@ import './App.css';
 import './index.css';
 
 import Canvas from './components/Canvas';
-import type { NodeData, ThemeMode, LearningPathNode } from './types';
+import type { NodeData, ThemeMode } from './types';
 import { generateSubtopics, generateMindMapStructure } from './services/aiService';
 import html2canvas from 'html2canvas';
 

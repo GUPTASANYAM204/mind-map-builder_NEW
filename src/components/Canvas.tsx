@@ -2,12 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Stage, Layer, Group, Path } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import Node from './Node';
-
-// Import types from the types.ts file
-import type { NodeData, NodeShape, ThemeMode, LearningPathNode } from '../types';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateLearningPath } from '../services/aiService';
+import type { NodeData, NodeShape, ThemeMode, LearningPathNode } from '../types';
 
 interface CanvasProps {
   mindMap: NodeData;
@@ -61,8 +58,7 @@ const Canvas: React.FC<CanvasProps> = ({
   });
   const [newNodeText, setNewNodeText] = useState('');
   const [selectedShape, setSelectedShape] = useState<NodeShape>('rectangle');
-  const [selectedColorScheme, setSelectedColorScheme] = useState<ThemeMode>('dark');
-  const [showSettings, setShowSettings] = useState(false);
+  const [selectedColorScheme] = useState<ThemeMode>('dark');  const [showSettings, setShowSettings] = useState(false);
   const [learningPath, setLearningPath] = useState<LearningPathNode[] | null>(null);
   const [showLearningPath, setShowLearningPath] = useState(false);
   const [isLoadingLearningPath, setIsLoadingLearningPath] = useState(false);
@@ -180,7 +176,7 @@ const Canvas: React.FC<CanvasProps> = ({
   // Function to center the mind map on the canvas
   const centerMindMap = useCallback(() => {
       if (stageRef.current && mindMap && containerRef.current) {
-          const stage = stageRef.current;
+          // const stage = stageRef.current;
           const containerWidth = containerRef.current.offsetWidth;
           const containerHeight = containerRef.current.offsetHeight;
 
