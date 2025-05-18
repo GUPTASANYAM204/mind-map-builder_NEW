@@ -577,7 +577,7 @@ const Canvas: React.FC<CanvasProps> = ({
     <motion.button
       whileHover={{ scale: 1.1, rotate }}
       whileTap={{ scale: 0.9 }}
-      className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg"
+      className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-white shadow-lg text-2xl"
       onClick={onClick}
     >
       {children}
@@ -604,8 +604,10 @@ const Canvas: React.FC<CanvasProps> = ({
   return (
     <div className="canvas-container relative" ref={containerRef}>
       {/* Control buttons */}
-      <div className="absolute top-4 right-4 flex space-x-3 z-30">
+      <div className="absolute top-4 right-4 z-30">
         <ControlButton onClick={toggleSettings} rotate={15}>⚙️</ControlButton>
+      </div>
+      <div className="absolute top-4 left-4 z-30">
         <ControlButton onClick={toggleLearningPath} rotate={-15}>📚</ControlButton>
       </div>
 
