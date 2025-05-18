@@ -22,8 +22,7 @@ const Node: React.FC<NodeProps> = ({
   text,
   x,
   y,
-  shape = 'rectangle', // Default to rectangle, use NodeShape type
-  colorScheme = 'dark', // Default to dark, use ThemeMode type
+ // Default to dark, use ThemeMode type
   onDragEnd,
   onContextMenu
 }) => {
