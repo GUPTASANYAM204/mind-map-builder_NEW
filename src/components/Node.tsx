@@ -89,7 +89,7 @@ const Node: React.FC<NodeProps> = ({
       fontWeight: isRoot ? 'bold' : 'normal',
       // Using a standard web-safe font stack
       fontFamily: "Arial, sans-serif",
-      fill: resolvedNodeTextColor, // Explicitly use the themed text color for the text
+      fill: 'red', // <--- MODIFIED FOR TESTING
       align: "center", // Horizontal alignment within the text bounding box
       verticalAlign: "middle", // Vertical alignment within the text bounding box
       wrap: "word",
