@@ -29,8 +29,21 @@ const Node: React.FC<NodeProps> = ({
   // Get colors based on the global theme variables from CSS
   // These variables should be defined in your index.css or App.css
   // Ensure --node-text and --node-bg are defined in your CSS and have enough contrast for text visibility.
-  const nodeFillColor = 'var(--node-bg)';
-  const nodeTextColor = 'var(--node-text)'; // Use this for text color
+  let resolvedNodeFillColor = '#1A2E47'; // Default color (dark mode bg)
+  if (typeof window !== 'undefined') {
+    const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--node-bg').trim();
+    if (colorValue) {
+      resolvedNodeFillColor = colorValue;
+    }
+  }
+
+  let resolvedNodeTextColor = '#FFFFFF'; // Default color
+  if (typeof window !== 'undefined') {
+    const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--node-text').trim();
+    if (colorValue) {
+      resolvedNodeTextColor = colorValue;
+    }
+  }
 
   // Determine if this is the root node
   const isRoot = id === 'root';
@@ -55,7 +68,7 @@ const Node: React.FC<NodeProps> = ({
       <Rect
         width={nodeWidth}
         height={nodeHeight}
-        fill={nodeFillColor} // Use themed fill color for the node background
+        fill={resolvedNodeFillColor} // Use themed fill color for the node background
         cornerRadius={parseInt(getComputedStyle(document.documentElement).getPropertyValue('--border-radius-rounded')) || 10} // Use CSS variable for corner radius
         offsetX={nodeWidth / 2}
         offsetY={nodeHeight / 2}
@@ -76,7 +89,7 @@ const Node: React.FC<NodeProps> = ({
       fontWeight: isRoot ? 'bold' : 'normal',
       // Using a standard web-safe font stack
       fontFamily: "Arial, sans-serif",
-      fill: nodeTextColor, // Explicitly use the themed text color for the text
+      fill: resolvedNodeTextColor, // Explicitly use the themed text color for the text
       align: "center", // Horizontal alignment within the text bounding box
       verticalAlign: "middle", // Vertical alignment within the text bounding box
       wrap: "word",
